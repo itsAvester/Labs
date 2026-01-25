@@ -54,6 +54,16 @@ Given I'd like to work as an actuary, I hope to gain a solid foundation in stati
 \![Caption for the picture.\] (/path/to/image.png)
 This is a photo from the first time I ever saw cows up close this summer. Cows are my favorite animal. I was trying to take a photo of this cow and I got startled because it licked me!! After I got scared, the herd of cows got also scared and they all started mooing very loudly. 
 
+### Parker Individual Written Section
+
+I have been applying to a lot of internships, with no luck. So if I could somehow compile some data, it would be interesting to apply a statistical learning method in order to answer this question: am I likely to get an interview if I apply for this internship? I would probably need data about the jobs where I did get internships and where I didn't
+
+Hopefully six months after graduation, I am in grad school, or at least admitted to one. I hope to pursue a masters in statistics. And then five years after graduation, I hope to be in some sort of statistics adjacent job, although I can't pin down what specific role that would be.
+
+I hope to retire early.
+
+I would say that my main interest is the underlying mathematics and theory with statistical methods. I hope to see more of that compared to regression.
+
 ### Team Applied Section
 
 Find the misclassification rate for K-nearest neighbors (KNN) for a range of k values, given a complicated true generating model. Do this individually. As a team, compare answers and then plot the decision boundary for the team's "best" value of k.
@@ -260,11 +270,126 @@ Q2: The misclassification rate for k=4 was 0.5. We were able to correctly classi
 
 Q3: If the borrower was 50 years old (X1=0.5) and had a yearly income of $50,000 (X2=0.5), our model with K=8 predicts that they will not default on their loan. This loan modeling could have ethical implications since it only considers age and income, and allows no room for nuance. For example, retired people who might have smaller, stable income but no liabilities (i.e. their house and car are paid off) might be denied a loan whereas someone with high income but high liabilities might be approved for a loan.
 
+### Parker Individual Section
+
+```{r}
+pred2k <- knn(train=training[,1:2], test=testing[,1:2], cl=training[,3], k=2)
+pred10k <- knn(train=training[,1:2], test=testing[,1:2], cl=training[,3], k=10)
+
+#Calculate Miscalculation rates for k=2 and k=10
+truth <- testing[[3]]
+pred2kn <- as.numeric(pred2k)
+pred10kn <- as.numeric(pred10k)
+
+misclass_rate <- function(predictions, truth) {
+  1-(sum(predictions == truth)/length(predictions))
+}
+    
+misclass_rate(pred2kn, testing[,3])
+misclass_rate(pred10kn, testing[,3])
+```
+It seems that k=10 yielded a better result with a misclassification rate of 0.64 over the 0.68 misclassification rate with k=2.
+
+```{r}
+#Plot Decision Boundary for k=2 
+
+testing.grid<-expand.grid(X1 =seq(0,1,by= .01),
+X2 =seq(0,1,by= .01))
+
+predicted.grid<-knn(train= training[,1:2],
+test= testing.grid,
+cl= training[,3],
+k= 2)
+
+predicted.gridxy<-testing.grid
+predicted.gridxy$Y <-as.numeric(predicted.grid)-1
+
+ggplot() + 
+  geom_raster(data = predicted.gridxy, aes(x = X1, y = X2, fill = as.factor(Y)), alpha = 0.3) +
+  geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y),
+breaks = 1.5, color = "black", size = 1) +
+  geom_point(data = training, aes(x = X1, y = X2, color = as.factor(Y))) +
+scale_fill_manual(values = c("green", "red"), name = "Region") +
+scale_color_manual(values = c("darkgreen", "darkred"), name = "Actual Class") +
+labs(title = "KNN Decision Boundary (k=2)",
+subtitle = "Black line indicates the Bayes-style decision boundary") +
+geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y +1),
+breaks = 1.5, color = "black", size = 1) + 
+theme_minimal()
+
+#Plot Decision Boudary for k=10
+
+predicted.grid10<-knn(train= training[,1:2],
+test= testing.grid,
+cl= training[,3],
+k= 10)
+
+predicted.gridxy<-testing.grid
+predicted.gridxy$Y <-as.numeric(predicted.grid10)-1
+
+ggplot() + 
+  geom_raster(data = predicted.gridxy, aes(x = X1, y = X2, fill = as.factor(Y)), alpha = 0.3) +
+  geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y),
+breaks = 1.5, color = "black", size = 1) +
+  geom_point(data = training, aes(x = X1, y = X2, color = as.factor(Y))) +
+scale_fill_manual(values = c("green", "red"), name = "Region") +
+scale_color_manual(values = c("darkgreen", "darkred"), name = "Actual Class") +
+labs(title = "KNN Decision Boundary (k=10)",
+subtitle = "Black line indicates the Bayes-style decision boundary") +
+geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y +1),
+breaks = 1.5, color = "black", size = 1) + 
+theme_minimal()
+```
+Q1: In this step we would try to understand why this is important or what types questions we can answer. A bank may ask how accurately they can predict fraud in their system given data X1 and X2. We would talk to domain experts to learn why this question is important: banks can better protect their customer's financial assets and also reduce financial losses to the bank itself. This is also the step where we would discuss data collection and the types of statistical learning methods that would be appropriate for the question at hand.
+
+Q2: This step is where the statistical method we decided upon will be implemented and tested. In our case, we would be using the home address and the transaction amount data to test and train the KNN model. 
+
+Q3: At this step we aim use the results obtained from the model and to understand what they mean. We may also ask how we can most effectively portray our results to non-domain experts. We will also discuss the limitations of the model.
+
 #### What teams need to do
 
 1.  Find the best k. Plot the decision boundary for that k.
 2.  Answer as many of the bonus questions as you can.
 
+### Team Section
+
+```{r}
+#Find the best k:
+#Set seed since knn function breaks ties randomly
+set.seed(123)
+vals <- rep(0,50)
+
+for(i in 1:50){
+ preds <- knn(train=training[,1:2], test=testing[,1:2], cl=training[,3], k=i) 
+ vals[i] <- misclass_rate(preds, testing[[3]])
+}
+```
+It seems that the best k is 5 which has a miclassification rate of 0.38
+
+```{r}
+#Plot Decision Boundary for k=5
+
+predicted.grid10<-knn(train= training[,1:2],
+test= testing.grid,
+cl= training[,3],
+k= 5)
+
+predicted.gridxy<-testing.grid
+predicted.gridxy$Y <-as.numeric(predicted.grid10)-1
+
+ggplot() + 
+  geom_raster(data = predicted.gridxy, aes(x = X1, y = X2, fill = as.factor(Y)), alpha = 0.3) +
+  geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y),
+breaks = 1.5, color = "black", size = 1) +
+  geom_point(data = training, aes(x = X1, y = X2, color = as.factor(Y))) +
+scale_fill_manual(values = c("green", "red"), name = "Region") +
+scale_color_manual(values = c("darkgreen", "darkred"), name = "Actual Class") +
+labs(title = "KNN Decision Boundary (k=5)",
+subtitle = "Black line indicates the Bayes-style decision boundary") +
+geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y +1),
+breaks = 1.5, color = "black", size = 1) + 
+theme_minimal()
+```
 #### Bonus questions
 
 Ultimately, we would like to know more about this problem, but we don't necessarily have all the tools yet to answer all of our questions. Here are some bonus questions:
