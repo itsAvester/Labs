@@ -64,6 +64,19 @@ I hope to retire early.
 
 I would say that my main interest is the underlying mathematics and theory with statistical methods. I hope to see more of that compared to regression.
 
+### Averey Individual Written Section
+(PHOTO) W/ CONTEXT
+
+What are the applications of neural networks, and why would you decide to implement them in a situation over other methods?
+
+6 months after graduation, I would be happy with any job in data science. 5 years after graduation, I would ideally be working in a sports field or aerospace field doing data science.
+
+I hope my greatest career accomplishment will be to create a large language model that achieves a complex task that was deemed unachievable before the model.
+
+Further my understanding of the foundations of data science and programming in R Studio, gain experience collaborating with fellow data scientists in hopes it will roughly translate to the industry, and get more comfortable with sharing my understanding of these course topics with others.
+
+One day, I would like to manage or start a small firm that can use data science as a tool for consulting or creating specific LLMs to a company's needs.
+
 ### Team Applied Section
 
 Find the misclassification rate for K-nearest neighbors (KNN) for a range of k values, given a complicated true generating model. Do this individually. As a team, compare answers and then plot the decision boundary for the team's "best" value of k.
@@ -158,6 +171,95 @@ ggplot(data=testing, aes(x=X1, y=X2, color=Y)) +
 3.  If possible, plot the decision boundaries for your k values.
 4.  Summarize the Q1, Q2, and Q3 aspects of this "project." Use your imagination. Everyone should have a different scenario.
 5.  Think about and discuss with your team some of the bonus questions below.
+
+
+### Averey Individual Section
+```{r}
+#Using k=3
+k=3
+predicted.ys <- knn(train = training[,1:2], test = testing[,1:2], cl=training[,3],k=k)
+misclass_rate <- function(predictions, test.truth) { #Given the model predictions and the true classifications
+  1-(sum(predictions==test.truth)/length(predictions))
+}
+
+misclass_rate(predicted.ys,testing[,3])
+```
+```{r}
+#Using k=7
+k=7
+predicted.ys <- knn(train = training[,1:2], test = testing[,1:2], cl=training[,3],k=k)
+misclass_rate <- function(predictions, test.truth) { #Given the model predictions and the true classifications
+  1-(sum(predictions==test.truth)/length(predictions))
+}
+
+misclass_rate(predicted.ys,testing[,3])
+```
+A k value of 3 resulted in a misclassification rate of 0.47. With k=7, having a misclassification rate of 0.44.
+The misclassification rate with k=7 was lower by .03.
+
+```{r}
+#Decision boundary for k=3
+library(class)
+library(ggplot2)
+
+testing.grid <- expand.grid(X1 = seq(0, 1, by = .01), 
+                            X2 = seq(0, 1, by = .01))
+
+predicted.grid <- knn(train = training[,1:2], 
+                      test = testing.grid, 
+                      cl = training[,3], 
+                      k = 3)
+predicted.gridxy <- testing.grid
+predicted.gridxy$Y <- as.numeric(predicted.grid) -1 
+
+# 4. Plotting
+ggplot() +
+  geom_raster(data = predicted.gridxy, aes(x = X1, y = X2, fill = as.factor(Y)), alpha = 0.3) +
+  geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y), 
+               breaks = 1.5, color = "black", size = 1) +
+  geom_point(data = training, aes(x = X1, y = X2, color = as.factor(Y))) +
+  scale_fill_manual(values = c("orange", "cornflowerblue"), name = "Region") +
+  scale_color_manual(values = c("darkorange", "blue"), name = "Actual Class") +
+  labs(title = "KNN Decision Boundary (k=3)",
+       subtitle = "Black line indicates the Bayes-style decision boundary") +
+   geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y +1),  
+               breaks = 1.5, color = "black", size = 1) + 
+theme_minimal()
+```
+```{r}
+#Decision boundary for k=7
+library(class)
+library(ggplot2)
+
+testing.grid <- expand.grid(X1 = seq(0, 1, by = .01), 
+                            X2 = seq(0, 1, by = .01))
+
+predicted.grid <- knn(train = training[,1:2], 
+                      test = testing.grid, 
+                      cl = training[,3], 
+                      k = 7)
+predicted.gridxy <- testing.grid
+predicted.gridxy$Y <- as.numeric(predicted.grid) -1 
+
+# 4. Plotting
+ggplot() +
+  geom_raster(data = predicted.gridxy, aes(x = X1, y = X2, fill = as.factor(Y)), alpha = 0.3) +
+  geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y), 
+               breaks = 1.5, color = "black", size = 1) +
+  geom_point(data = training, aes(x = X1, y = X2, color = as.factor(Y))) +
+  scale_fill_manual(values = c("orange", "cornflowerblue"), name = "Region") +
+  scale_color_manual(values = c("darkorange", "blue"), name = "Actual Class") +
+  labs(title = "KNN Decision Boundary (k=7)",
+       subtitle = "Black line indicates the Bayes-style decision boundary") +
+   geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y +1),  
+               breaks = 1.5, color = "black", size = 1) + 
+theme_minimal()
+```
+Q1: We want to use metrics from a college to predict if a student will likely graduate. We want a tool for universities to be able to preemptively reach out to students and let them know they are potentially on a bad path before it is too late. This could raise a university's graduation rate, which in turn helps the students who attend the university. The graduation prediction will take into account a student's GPA percentile and the percentage of classes they attend. The data would be collected by students opting in to giving their data via an email sent to the entire student body. The data would likely show that high GPA and attendance are very good predictors of if a student will graduate. By creating a decision boundary using K-nearest-neighbors and misclassification metrics to find the best k value for the model, an ideal model, given these metrics, could be found. This is a common technique and could be easily explained to those opting into the study as well as those viewing the report.
+
+Q2: Y=If a student who attends college graduates. X1= percentage of classes attended. X2= percentile of GPA of a student after the first semester. With k values of 3 and 7, the misclassification rates were respectively 0.47 and 0.44.
+
+Q3: The results show that our k-nearest-neighbors with a k value of 3, the method used, only correctly guessed 53% of the students' graduation based on their GPA percentile and the percentage they attended all classes. When using a k value of 7, the misclassification rate was 44%. This means that the method correctly predicted if a student would graduate 56% of the time. With these models, I would not be confident enough in the models with these metrics to publish this for university use. Ethically, this could be problematic as universities might use these metrics for a different, unintended use, such as putting fewer resources into students who are predicted not to graduate. This model also misclassified 44% at best, which ethically could be problematic, as it could cause unintentional stress to students who are predicted to fail, as the model could very likely be wrong and could lead to a student putting less effort into school or dropping out preemptively. 
 
 ### Corva Individual Section 
 
