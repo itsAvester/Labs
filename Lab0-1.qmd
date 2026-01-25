@@ -274,21 +274,21 @@ Q3: If the borrower was 50 years old (X1=0.5) and had a yearly income of $50,000
 
 ```{r}
 pred2k <- knn(train=training[,1:2], test=testing[,1:2], cl=training[,3], k=2)
-pred10k <- knn(train=training[,1:2], test=testing[,1:2], cl=training[,3], k=10)
+pred6k <- knn(train=training[,1:2], test=testing[,1:2], cl=training[,3], k=10)
 
-#Calculate Miscalculation rates for k=2 and k=10
+#Calculate Miscalculation rates for k=2 and k=6
 truth <- testing[[3]]
 pred2kn <- as.numeric(pred2k)
-pred10kn <- as.numeric(pred10k)
+pred6kn <- as.numeric(pred6k)
 
 misclass_rate <- function(predictions, truth) {
   1-(sum(predictions == truth)/length(predictions))
 }
     
 misclass_rate(pred2kn, testing[,3])
-misclass_rate(pred10kn, testing[,3])
+misclass_rate(pred6kn, testing[,3])
 ```
-It seems that k=10 yielded a better result with a misclassification rate of 0.64 over the 0.68 misclassification rate with k=2.
+It seems that k=6 yielded a better result with a misclassification rate of 0.66 over the 0.69 misclassification rate with k=2.
 
 ```{r}
 #Plot Decision Boundary for k=2 
