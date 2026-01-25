@@ -19,9 +19,13 @@ editor: visual
 2.  Each team member will add their own individual section to the team Quarto document. How do you want to collaborate on your document this semester? Github? Google Colab? Something else? See instructions for individual sections below.
 3.  As a team, you will complete an applied "project". There will be some individual components (so that everyone gets practice with implementing the stat learning methods) and team components.
 
-### About Your Team
+### About The Crows
 
-In this team section, include a team photo (all of you), your team name, and your team’s main goal for this semester for this course (i.e., what does your team want to accomplish by the end of the semester?). Throughout the semester you will be giving feedback to your teammates about how well they are helping your team accomplish its goal(s).
+insert group photo here. put a space between the close bracket and the open parentheses
+
+\![Caption for the picture.\] (/path/to/image.png)
+
+Our team name is The Crows. Our main goal for this semester for this course is to build a solid foundation in both coding and statistical learning methods in order to be equipped to use them in real-life settings.
 
 #### Individual Sections
 
@@ -33,6 +37,22 @@ Each individual must complete their own subsection, which must include:
 -   what you hope your greatest career accomplishment will be
 -   and given these hopes and goals, what you are hoping to learn/accomplish/do in this course.
 -   You must also include something of your own choosing not described above. Anything. Be creative!
+
+### Corva Individual Written Section
+
+\![Caption for the picture.\] (/path/to/image.png)
+This photo was taken in September by my friends while we were attending the Colorado Flute Association's Flute Fair at DU. I had no idea that the original Chipotle was in Denver and was super excited because I love a good Chipotle bowl.
+
+I would love to know when and how much it will snow next in Colorado, since it feels like most of this winter has been dry, windy, and cold. Using variable like temperature, cloud cover, and weather in other parts of the country, I could build some binary classification model (will it snow or will it not snow)?. I could also use some sort of regression to predict how much it will snow.
+
+Six months after graduation, I would love to be living in and exploring a new city. In five years, I'd love to have obtained my ACAS (associate of the Casualty Actuary Society) and have a fulfilling job working in that field. In five years, I would also be so excited to adopt a pair of dogs and go on lots of hikes with them.
+
+Although my biggest career goal in general is to have stable, satisfying work and lots of work-life balance (I would love to work remotely!), I think a big accomplishment would be to gain more credentials and work as some sort of team lead. I'd love to be in charge of something like financial strategy for a company.
+
+Given I'd like to work as an actuary, I hope to gain a solid foundation in statistical learnining methods in this course. I would also like to gain more confidence in R in applying these methods.
+
+\![Caption for the picture.\] (/path/to/image.png)
+This is a photo from the first time I ever saw cows up close this summer. Cows are my favorite animal. I was trying to take a photo of this cow and I got startled because it licked me!! After I got scared, the herd of cows got also scared and they all started mooing very loudly. 
 
 ### Team Applied Section
 
@@ -128,6 +148,117 @@ ggplot(data=testing, aes(x=X1, y=X2, color=Y)) +
 3.  If possible, plot the decision boundaries for your k values.
 4.  Summarize the Q1, Q2, and Q3 aspects of this "project." Use your imagination. Everyone should have a different scenario.
 5.  Think about and discuss with your team some of the bonus questions below.
+
+### Corva Individual Section 
+
+```{r}
+#fitting KNN on k=4
+
+predicted.ys_4 <- knn(train = training[,1:2], 
+                      test = testing[,1:2], 
+                      cl=training[,3],
+                      k=4)
+
+#fitting KNN on k=8
+
+predicted.ys_8 <- knn(train=training[,1:2],
+                      test=testing[,1:2],
+                      cl=training[,3],
+                      k=8)
+```
+```{r}
+#misclassification rate is number of incorrect predictions/ total number of predictions
+
+#misclass rate for k=4
+misclass_rate_4 = 1-(sum(predicted.ys_4==testing[,3])/length(predicted.ys_4))
+misclass_rate_4
+
+#misclass rate for k=8
+misclass_rate_8 = 1-(sum(predicted.ys_8==testing[,3])/length(predicted.ys_8))
+misclass_rate_8
+```
+
+Using the testing dataset as the truth, the misclassification rate for k=4 was 0.50. The misclassification rate for a higher K at k=8 was an improvement at 0.41. 
+
+```{r}
+#plot decision boundaries for k=4
+
+# setting the grid that we will predict on 
+testing.grid_4 <- expand.grid(X1 = seq(0, 1, by = .01), 
+                            X2 = seq(0, 1, by = .01))
+# predicting on the grid
+predicted.grid_4 <- knn(train = training[,1:2], 
+                      test = testing.grid_2, 
+                      cl = training[,3], 
+                      k = 4)
+
+predicted.gridxy_4 <- testing.grid_4
+predicted.gridxy_4$Y <- as.numeric(predicted.grid_8) -1
+
+ggplot() +
+  geom_raster(data = predicted.gridxy_4, aes(x = X1, y = X2, fill = as.factor(Y)), alpha = 0.3) +
+  geom_contour(data = predicted.gridxy_4, aes(x = X1, y = X2, z = Y), 
+               breaks = 1.5, color = "black", size = 1) +
+  geom_point(data = training, aes(x = X1, y = X2, color = as.factor(Y))) +
+  scale_fill_manual(values = c("orange", "cornflowerblue"), name = "Region") +
+  scale_color_manual(values = c("darkorange", "blue"), name = "Actual Class") +
+  labs(title = "KNN Decision Boundary (k=4)",
+       subtitle = "Black line indicates the Bayes-style decision boundary") +
+   geom_contour(data = predicted.gridxy_4, aes(x = X1, y = X2, z = Y +1),  
+               breaks = 1.5, color = "black", size = 1) +
+theme_minimal()
+
+
+
+#plot decision boundaries for k=8
+
+# setting the grid that we will predict on 
+testing.grid_8 <- expand.grid(X1 = seq(0, 1, by = .01), 
+                            X2 = seq(0, 1, by = .01))
+# predicting on the grid
+predicted.grid_8 <- knn(train = training[,1:2], 
+                      test = testing.grid_2, 
+                      cl = training[,3], 
+                      k = 8)
+
+predicted.gridxy_8 <- testing.grid_8
+predicted.gridxy_8$Y <- as.numeric(predicted.grid_8) -1
+
+ggplot() +
+  geom_raster(data = predicted.gridxy_8, aes(x = X1, y = X2, fill = as.factor(Y)), alpha = 0.3) +
+  geom_contour(data = predicted.gridxy_8, aes(x = X1, y = X2, z = Y), 
+               breaks = 1.5, color = "black", size = 1) +
+  geom_point(data = training, aes(x = X1, y = X2, color = as.factor(Y))) +
+  scale_fill_manual(values = c("orange", "cornflowerblue"), name = "Region") +
+  scale_color_manual(values = c("darkorange", "blue"), name = "Actual Class") +
+  labs(title = "KNN Decision Boundary (k=8)",
+       subtitle = "Black line indicates the Bayes-style decision boundary") +
+   geom_contour(data = predicted.gridxy_8, aes(x = X1, y = X2, z = Y +1),  
+               breaks = 1.5, color = "black", size = 1) +
+theme_minimal()
+```
+
+```{r}
+#observation of x1=0.5, x2=0.5
+observation <- data.frame(X1 = 0.5, X2 = 0.5)
+
+training_data_frame <- as.data.frame(training)
+
+#Perform the KNN prediction
+predicted_y <- knn(
+  train = training[, c("X1", "X2")],       
+  test = observation[, c("X1", "X2")],  
+  cl = training_data_frame$Y,                        
+  k = 8                                       
+)
+predicted_y
+```
+
+Q1: In this "project", Y was whether or not a borrower defaulted on their loan (default=1, no default=0), given their age(X1) and income (X2). This project is important for banks to understand which borrowers are risky to give loans to. 
+
+Q2: The misclassification rate for k=4 was 0.5. We were able to correctly classify a borrower as defaulting or not only half of the time. The misclassification rate for a higher K at k=8 was an improvement at 0.41. With K=8, 41% of our predictions about borrowers paying their loans were incorrect. 
+
+Q3: If the borrower was 50 years old (X1=0.5) and had a yearly income of $50,000 (X2=0.5), our model with K=8 predicts that they will not default on their loan. This loan modeling could have ethical implications since it only considers age and income, and allows no room for nuance. For example, retired people who might have smaller, stable income but no liabilities (i.e. their house and car are paid off) might be denied a loan whereas someone with high income but high liabilities might be approved for a loan.
 
 #### What teams need to do
 
