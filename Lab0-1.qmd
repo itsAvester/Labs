@@ -78,6 +78,15 @@ Further my understanding of the foundations of data science and programming in R
 
 One day, I would like to manage or start a small firm that can use data science as a tool for consulting or creating specific LLMs to a company's needs.
 
+### Alice Individual Written Section
+\![DB 2025\] (/path/to/image.jpeg)
+This is me in front of a Deutsche Bahn (German) train during my trip to Europe last summer. I had taken so many DB trains that upon realizing the photo was taken on my privacy-minded dad's phone and thus had no location data, I had to look up pictures to verify this was Frankfurt airport station.
+
+I want to apply statistical learning methods to my advocacy with data class this semester, where I've decided my project focus will be birth justice in Boulder. Given the US having the poorest birth outcomes of any high-resource country, I want to use interviews or questionaires with Boulder birth workers and parents to quantify variables in local maternal care that are highly linked with maternal and neonatal outcomes. This would include assessing the state of science-based stillbirth prevention measures, occurence and severity of obstetric violence and disrespectful care, access to diverse and midwifery-model providers, and education about maternal early warning signs in our community. 
+
+I would like to have moved to Europe within six months of graduation, where I'm excited to live in a walkable community and spend more more time with my family in Germany. In five years, I hope to have gained a footing somewhere in professional statistics that could lead me closer to a higher impact dream job making patient-centered differences in a field like genetics, maternal health, or healthcare quality. 
+In this course, I need to work on my time management and I'd like to grow confident with unstructured and other matrix-centered learning methods. 
+
 ### Team Applied Section
 
 Find the misclassification rate for K-nearest neighbors (KNN) for a range of k values, given a complicated true generating model. Do this individually. As a team, compare answers and then plot the decision boundary for the team's "best" value of k.
@@ -493,6 +502,47 @@ geom_contour(data = predicted.gridxy, aes(x = X1, y = X2, z = Y +1),
 breaks = 1.5, color = "black", size = 1) + 
 theme_minimal()
 ```
+### Alice individual section
+```{r}
+knn.pred5 <- knn(training, testing, Y, k = 5)
+table(knn.pred5, Y)
+mean(knn.pred5 == Y)
+
+knn.pred5 <- knn(training, testing, Y, k = 1)
+table(knn.pred5, Y)
+mean(knn.pred5 == Y)
+```
+```{r}
+# plotting k = 1
+grid <- expand.grid(X1 = seq(0, 1, length = 200), X2 = seq(0, 1, length = 200)) #initializing for plotting 
+grid$pred1 <- knn(training[,1:2], #extracts X1 & X2 
+                  grid, 
+                  as.factor(training[,3]), #extracts Y
+                  k = 1)
+ggplot() + 
+  geom_tile(data = grid, aes(X1, X2, fill=pred1, alpha = .1)) +
+  geom_point(data = testing, aes(X1, X2, color = as.factor(Y))) + 
+  labs(title = "K = 1 KNN Decision Boundaries")
+```
+
+```{r}
+# plotting k = 5
+grid <- expand.grid(X1 = seq(0, 1, length = 200), X2 = seq(0, 1, length = 200)) #initializing for plotting 
+grid$pred5 <- knn(training[,1:2], #extracts X1 & X2 
+                  grid, 
+                  as.factor(training[,3]), #extracts Y
+                  k = 5)
+ggplot() + 
+  geom_tile(data = grid, aes(X1, X2, fill=pred5, alpha = .1)) +
+  geom_point(data = testing, aes(X1, X2, color = as.factor(Y))) + 
+  labs(title = "K = 5 KNN Decision Boundaries")
+```
+
+Q1: Given the low visual correlation between the response and predictors and a classification error rate greater than 50%, Y could represent the true diagnosis rate of an extremely rare condition upon invasive testing amongst subjects who *tested positive for the condition initially on a noninvasive screening*. X1 and X2 are normalized continuous numeric predictors of health correlated with occurence of the condition, such as red and white blood cell count in the case of predicting rare lymphoma. 
+Q2: The misclassification rate for k = 1 was 0.55 and 0.51 for k = 5, meaning that positive initial lymphoma screening were false positives 45% and 49% of the time respectively. This indicates the initial screening test has low specificity, which is a sign of poor performance and not tolerated in test design for a more common condition (ex. prenatal tests for most chromosomal abnormalities). But a low true diagnosis rate is a statistical inevitability for screening rarer conditions (ex. prenatal testing for microdeletions). 
+(transitioning example to prenatal testing, which I did not use the entire time due to not knowing any realistic predictor variables in the context of raw DNA analysis, let alone continuous numeric ones, but I'm in that class this semester!) 
+Q3: Patient-facing prenatal testing is already rife with misunderstanding, so given this context (all individuals appearing on the visual are those who recieved a positive prenatal screening for a certain condition, where the Y results correspond to their true diagnosis after invasive testing), this method and visual would need to be explained carefully to patients and providers. Because invasive testing in this context (amniocentesis) is unpleasant and carries a number of risks, the audience needs to understand how dramatically the rarity of a condition could impact their decisions. This visual could denote either an ineffective test for a more common condition that should be phased out, or it could be the inevitable numeric result of screening for a very rare condition, which leads to different decisions for subsequent invasive testing. 
+
 #### Bonus questions
 
 Ultimately, we would like to know more about this problem, but we don't necessarily have all the tools yet to answer all of our questions. Here are some bonus questions:
