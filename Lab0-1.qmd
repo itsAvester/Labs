@@ -65,7 +65,8 @@ I hope to retire early.
 I would say that my main interest is the underlying mathematics and theory with statistical methods. I hope to see more of that compared to regression.
 
 ### Averey Individual Written Section
-(PHOTO) W/ CONTEXT
+\![Caption for the picture.\] (/path/to/image.png)
+This photo is from this past winter break. My family went to Hawaii, and I had a mission to find one of these shirts.
 
 What are the applications of neural networks, and why would you decide to implement them in a situation over other methods?
 
