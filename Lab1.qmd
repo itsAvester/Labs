@@ -105,6 +105,23 @@ n = 1000
 
 ## Parker Individual Section
 
+```{r}
+# Create the training dataset as above using seed=200
+# Create a testing dataset using seed=201, 202, 203, or 204
+
+set.seed(202)
+n = 1000
+X1 <- runif(n,0,1)
+X2 <- runif(n,0,1)
+
+Y <- rep(0,n)
+for (i in 1:n) {
+  Y[i] <- generate_y(X1[i],X2[i])
+}
+
+testing <- cbind(X1, X2, Y)
+```
+
  ```{r}
     training <- as.data.frame(training)
     testing <- as.data.frame(testing)
