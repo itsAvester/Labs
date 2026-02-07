@@ -256,10 +256,45 @@ results
 Q1: I will stick with the story I had for lab zero, where I imagined creating a model for the purpose of fraud detection for financial institutions. I will imagine that X1 is the purchase amount, and then X2 will be the distance from the home address, where each observation is a purchase made with a credit card. We want to create a classification model, which could be a logistic, LDA, QDA, Naive Bayes, or KNN model. Some of these models are more simple than others (logistic, KNN), while the others may be harder to interpret, so we have to keep that in mind when we decide which model to use. A financial institution will also likely have a preference for a model with a higher true positive rate (sensitivity), rather than a higher true negative rate (specificity). This is because we want our model to correctly predict fraud as much as possible. 
 
 Q3: Looking at the results, it looks like the models with the lowest misclassification rates were QDA and KNN. They both wrongly predicted whether a purchase was fraud about 38 percent of the time. However, the models with the highest sensitivity were logistic, LDA, and Naive Bayes, which all correctly predicted fraud about 60 percent of the time. At this step, we would also discuss the assumptions of these models, like how LDA and QDA assume the data is normally distributed, along with Naive Bayes that assumes the predictors are conditionally independent given the class. All things considered, the most enticing model could be the Naive Bayes model because it has high sensitivity and specificity, as well as having one of the lowest misclassification rates. One of the assumptions of Naive Bayes is that given the class, the predictors are independent. I think this can be assumed because if we are given that a purchase was fraudulent, whether a purchase is large or not does not give us any information about the location of the purchase. One drawback of Naive Bayes is that it would be harder to interpret to non-domain experts, so maybe we want to look at the logistic regression model. 
+
 #### What teams need to do
 
 1.  Summarize the models' performance using all of the results from each individual.
 2.  Which is the best model to use in this situation?
+
+## Team Section
+
+```{r}
+# Model Performance Summarization
+
+yes <- results <- data.frame(
+  Model = c("Logistic", "LDA", "QDA", "Naive Bayes", "KNN"),
+  Misclassification = c(0.412,0.413,0.38,0.392,0.381),
+  Sensitivity = c(0.657,0.655,0.549,0.612,0.571),
+  Specificity = c(0.519,0.519,0.691,0.604,0.665))
+
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+yes_long <- yes %>%
+  pivot_longer(
+    cols = -Model,
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+ggplot(yes_long, aes(x = Value, y = Model, color=Metric)) +
+  geom_point(size = 3) +
+  facet_wrap(~Metric, scales = "free_x") +
+  scale_color_manual(values = c(
+    "Misclassification" = "red",
+    "Sensitivity" = "blue",
+    "Specificity" = "darkgreen"
+  ))+
+  theme_minimal()
+
+```
 
 #### **Some intended outcomes from this assignment:**
 
