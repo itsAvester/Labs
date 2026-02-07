@@ -559,13 +559,111 @@ Q2: This is the summary of each model
 
 Q3: Given the relatively high error across all models, this could morally lead to players misjudging where a pitch might end up causing a batters batting average to decrease instead of increase as if the model was connected to a buzzer, this could lead the batter to not swing at pitches that they normally would have. Given the point (.75,.25) the batter would choose to take this pitch and hope it is a ball.
 
+## Alice Individual Section
+```{r}
+# Create the training dataset as above using seed=200
+# Create a testing dataset using seed=201, 202, 203, or 204
 
-#### What teams need to do
+set.seed(203)
+n = 1000
+x1 <- runif(n, 0, 1)
+x2 <- runif(n, 0, 1)
+y <- rep(0, n)
+for (i in 1:n) {
+  y[i] <- generate_y(x1[i], x2[i])
+}
 
-1.  Summarize the models' performance using all of the results from each individual.
-2.  Which is the best model to use in this situation?
+testing <- as.data.frame(cbind(x1, x2, y))
+training <- as.data.frame(training)
+# ggplot(data = testing, aes(x=x1, y=x2, color = y)) + 
+#  geom_point()
+```
 
-## Team Section
+#### What individuals need to do
+
+1.  Given the training set (seed=200), fit:
+    1.  logistic regression model
+    2.  linear discriminant analysis (LDA)
+    3.  quadratic discriminant analysis (QDA)
+    4.  naive Bayes
+    5.  KNN with k=optimal k from Lab0
+```{r}
+library(caret)
+# logistic
+m_log <- glm(y ~ x1 + x2, data = training, family = binomial)
+m_log_probs <- predict(m_log, newdata = testing)
+Test_m_log <- testing %>%
+  mutate(m_log_probs = m_log_probs, m_log_preds = ifelse(m_log_probs > .5, 1, 0))
+misC_log <- mean(Test_m_log$m_log_probs != Test_m_log$y)
+log_test_probs <- predict(m_log, newdata = testing, type = "response")
+log_test_preds <- factor(ifelse(log_test_probs > .5, 1, 0))
+y2 <- as.factor(Test_m_log$y)
+# log model output
+confusionMatrix(log_test_preds, y2, positive = "1")
+# log point 
+pt <- data.frame(x1 = c(.75), x2 = c(.75))
+log_pt <- predict(m_log, pt, type = "response")
+log_pt
+```
+
+```{r}
+# lda
+levels <- c("0", "1")
+comp <- factor(testing$y, levels = levels)
+library(MASS)
+m_lda <- lda(y ~ x1 + x2, data = training)
+m_lda_probs <- predict(m_lda, testing)
+m_lda_preds <- m_lda_probs$class
+misC_lda <- mean(comp != m_lda_preds)
+confusionMatrix(m_lda_preds, comp, positive = "1")
+lda_pt <- predict(m_lda, pt)
+lda_pt
+```
+
+```{r}
+# qda 
+m_qda <- qda(y~x1+x2, data = training)
+m_qda_probs <- predict(m_qda, testing)
+m_qda_preds <- m_qda_probs$class
+misC_qda <- mean(comp != m_qda_preds)
+confusionMatrix(m_qda_preds, comp, positive = "1")
+qda_pt <- predict(m_qda, pt)
+qda_pt
+```
+
+```{r}
+# naiive bayes
+library(e1071)
+m_nb <- naiveBayes(y~x1+x2, data = training)
+m_nb_probs <- predict(m_nb, newdata = testing)
+misC_nb <- mean(m_nb_probs != comp)
+nb_pt <- predict(m_nb, pt)
+nb_pt
+confusionMatrix(table(comp, m_nb_probs), positive = "1")
+```
+```{r}
+library(class)
+m_knn <- knn(train = training[,1:2], test = testing[,1:2], cl = training[,3], k = 5)
+misC_knn <- 1 - sum(m_knn == testing[,3])/length(testing$y)
+table(testing$y, m_knn)
+knn_pt <- predict(m_knn, pt)
+knn_pt
+```
+
+```{r}
+Atab <- matrix(c(0.432,0.5796,0.5562, _,
+                 0.401, .6056, .5924, _
+                 0.4, .6076, .5924, _,
+                0.389,0.6137,0.6083, _, 
+                 .37, .5498, .7108, _, 
+                "1","1","1","1","1"),byrow=TRUE, nrow=4)
+rownames(Atab) <- c('Misclassification', 'Sensitivity', 'Specificity', 'Prediction')
+colnames(Atab) <- c('KNN', 'LDA', 'Logistic', 'Naive Bayes', 'QDA')
+resultsA <- data.frame(Atab)
+```
+Q1: Given the high variability of this data, this could be attempting to predict the default rate on subprime loans based on normalized numeric factors like income and debt to help lenders make more profitable decisions selecting future clients based on their financial status. 
+Q2: All of the models tested on this seed had misclassification rates between .37 and .44. with QDA and KNN (k = 5) respectively. My point (.75, .75) could represent somebody with upper-percentile income but also with upper-percentile debt compared to other borrowers. Most of the models predicted default for this borrower. 
+Q3: When extrapolating predictions like this to the real world, it should also be noted that the prediction accuracy in a real-world scenario likely decreases as one approaches the limits of the range and strays from the central values due to the increased variability in personal circumstance required of somebody to end up in that higher income, higher debt category like my borrower is (75th percentile in both income and debt). 
 
 ```{r}
 # Model Performance Summarization
