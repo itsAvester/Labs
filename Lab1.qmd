@@ -413,9 +413,9 @@ Q3: Looking at the results, it looks like the models with the lowest misclassifi
 
 yes <- results <- data.frame(
   Model = c("Logistic", "LDA", "QDA", "Naive Bayes", "KNN"),
-  Misclassification = c(0.412,0.413,0.38,0.392,0.381),
-  Sensitivity = c(0.657,0.655,0.549,0.612,0.571),
-  Specificity = c(0.519,0.519,0.691,0.604,0.665))
+  Misclassification = c(0.412,0.413,0.38,0.392,0.381,0.409,0.41,0.38,0.376,0.432),
+  Sensitivity = c(0.657,0.655,0.549,0.612,0.571,0.482,0.685,0.576,0.640,0.591),
+  Specificity = c(0.519,0.519,0.691,0.604,0.665,0.687,0.481,0.670,0.606,0.541))
 
 library(tidyr)
 library(dplyr)
