@@ -103,6 +103,150 @@ n = 1000
 3.  Make a prediction for a new point (x1, x2) = (0.25, 0.25) or (0.25, 0.75) or (0.75, 0.25) or (0.75, 0.75) for each fitted model. Each individual will have a different point for their predictions.
 4.  Summarize the Q1, Q2, and Q3 aspects of this "project."
 
+### Corva Individual Section
+
+```{r}
+
+# creating testing set
+
+set.seed(201)
+X1 <- runif(1000,0,1)
+X2 <- runif(1000,0,1)
+
+Y <- rep(0,1000)
+for (i in 1:1000) {
+  Y[i] <- generate_y(X1[i],X2[i])
+}
+
+testingcorva <- cbind(X1, X2, Y)
+testingcorva <- data.frame(testingcorva)
+
+#my point is (0.25, 0.25)
+corvapoint <- data.frame(X1=0.25, X2=0.25)
+```
+
+```{r}
+#fit logistic regression model
+
+lrcorvafit <- glm(Y~X1+X2, data=data.frame(training), family="binomial")
+lrcorvaprob <- predict(lrcorvafit, newdata=testingcorva, type="response")
+lrcorvaclass <- testingcorva %>%
+  mutate(classprob = lrcorvaprob,
+         predclass = ifelse(classprob > 0.5, 1, 0))
+
+lrcorvamisclass <- mean(lrcorvaclass$Y != lrcorvaclass$predclass)
+
+table(lrcorvaclass$Y, lrcorvaclass$predclass)
+
+lrsensitivity <- 365/(365+166)
+lrspecificty <- 226/(226+243)
+
+lrcorvapointprob <- predict(lrcorvafit, newdata=corvapoint, type="response")
+lrcorvapoint <- ifelse(lrcorvapointprob > 0.5, 1, 0)
+```
+
+```{r}
+#fit LDA model
+
+ldacorvafit <- lda(Y~X1+X2, data=data.frame(training))
+ldacorvaprob <- predict(ldacorvafit, newdata=testingcorva, type="response")
+ldacorvaclass <- ldacorvaprob$class
+
+ldacorvamisclass <- mean(ldacorvaclass != testingcorva$Y)
+
+table(testingcorva$Y, ldacorvaclass)
+
+ldasensitivity <- 364/(364+167)
+ldaspecificity <- 226/(226+243)
+
+ldacorvapointprob <- predict(ldacorvafit, newdata=corvapoint)
+ldacorvapoint <- ldacorvapointprob$class
+```
+
+```{r}
+#fit QDA model
+
+qdacorvafit <- qda(Y~X1+X2, data=data.frame(training))
+qdacorvaprob <- predict(qdacorvafit, newdata=testingcorva, type="response")
+qdacorvaclass <- qdacorvaprob$class
+
+qdacorvamisclass <- mean(qdacorvaclass != testingcorva$Y)
+
+table(testingcorva$Y, qdacorvaclass)
+
+qdasensitivity <- 306/(306+225)
+qdaspecificity <- 314/(314+155)
+
+qdacorvapointprob <- predict(qdacorvafit, newdata=corvapoint)
+qdacorvapoint <- qdacorvapointprob$class
+```
+
+```{r}
+#fit naive Bayes
+library(e1071)
+nbcorvafit <- naiveBayes(Y~X1+X2, data = data.frame(training))
+nbcorvaclass <- predict(nbcorvafit, newdata=testingcorva)
+
+nbcorvamisclass <- mean(nbcorvaclass != testingcorva$Y)
+
+table(testingcorva$Y, nbcorvaclass)
+
+nbsensitivity <- 340/(340+191)
+nbspecificity <- 284/(284+185)
+
+nbcorvapoint <- predict(nbcorvafit, newdata=corvapoint)
+```
+
+```{r}
+#fit KNN with k=5 which is the optimal k from Lab0
+
+knncorvafit <- knn(train = training[,1:2],
+                   test = testingcorva[,1:2],
+                   cl=training[,3],
+                   k=5)
+
+knncorvamisclass = 1-(sum(knncorvafit==testingcorva[,3])/length(testingcorva$Y))
+
+table(testingcorva$Y, knncorvafit)
+
+knnsensitivity <- 314/(314+217)
+knnspecificity <- 254/(254+215)
+
+knncorvapoint <- knn(train=training[,1:2],
+                     test=corvapoint[,1:2],
+                     cl=training[,3],
+                     k=5)
+```
+
+
+```{r}
+# Table with all of the results
+corvatab <- matrix(c(0.409,0.41,0.38,0.376,0.432,
+                0.482,0.685,0.576,0.640,0.591,
+                0.687,0.481,0.670,0.606,0.541,
+                "1","1","1","1","1"),byrow=TRUE, nrow=4)
+rownames(corvatab) <- c('Misclassification', 'Sensitivity', 'Specificity', 'Prediction')
+colnames(corvatab) <- c('Logistic','LDA','QDA','Naive','KNN')
+corvaresults <- data.frame(corvatab)
+```
+
+Q1: In this “project”, Y was whether or not a borrower defaulted on their loan (default=1,no default=0), given their age(X1) and income (X2). The specific prediction is for an age 25 borrower (X1=0.25) who earns $25,000 a year (X2=0.25). This project is important for banks to understand which borrowers are risky to give loans to. 
+
+Q2:
+```{r}
+corvaresults
+```
+
+It appears that misclassification rates of the models are all around 40%. The lowest misclassification rate was with 37.6% with Naive Bayes and the highest misclassification rate was 43.2% with KNN. The model with the highest sensitivity was LDA with 68.5% and the lowest sensitivity was Logistic at 48.2%. The model with the highest specificity was Logistic at 68.7% and the model with the lowest specificity was LDA at 48.1%. Given a 25 year old borrower who earns $25,000 a year, all of the models predicted that the borrower would default.
+
+Q3:
+I would recommend not lending to this 25 year old borrower who earns $25,000 a year since all of the models used predicted that he would default on his loan. This loan modelling has ethical implications since it only considers predictors age and income. Other predictors like loan size could be overlooked, and this borrower could be denied a loan that they really needed but could reasonably pay off.
+
+
+
+
+
+
 ## Parker Individual Section
 
 ```{r}
