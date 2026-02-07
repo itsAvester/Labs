@@ -1,6 +1,6 @@
 ---
 title: "Lab1"
-author: "Eric Vance"
+author: "Eric Vance, Alice Warnick, Parker Breaux, Averey Copeland, Corva Graham"
 format: pdf
 editor: visual
 date: 2025-02-02
@@ -440,11 +440,4 @@ ggplot(yes_long, aes(x = Value, y = Model, color=Metric)) +
 
 ```
 
-#### **Some intended outcomes from this assignment:**
-
--   You will individually get practice fitting a logistic regression, LDA, QDA, naive Bayes, and KNN
--   You will compare the performance of these five models
--   You will make predictions based on statistical learning models
--   You will practice describing how the Q1 context affects your Q2 and Q3 outcomes, i.e., you will practice thinking about the whole problem (i.e., Q1Q2Q3, not just the Q2 quantitative parts)
--   You will compare models visually
--   You will gain experience collaborating with your teammates on an applied problem
+Because of situations including predicting loan default or predicting fraud, the best model would have a higher sensitivity. Sensitivity is an important metric because the consequences for not predicting loan default or fraud are higher than wrongly flagging someone for default or fraud. It appears that LDA has the highest sensitivity which would be the best model in this situation. 
