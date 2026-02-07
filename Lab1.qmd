@@ -401,6 +401,165 @@ Q1: I will stick with the story I had for lab zero, where I imagined creating a 
 
 Q3: Looking at the results, it looks like the models with the lowest misclassification rates were QDA and KNN. They both wrongly predicted whether a purchase was fraud about 38 percent of the time. However, the models with the highest sensitivity were logistic, LDA, and Naive Bayes, which all correctly predicted fraud about 60 percent of the time. At this step, we would also discuss the assumptions of these models, like how LDA and QDA assume the data is normally distributed, along with Naive Bayes that assumes the predictors are conditionally independent given the class. All things considered, the most enticing model could be the Naive Bayes model because it has high sensitivity and specificity, as well as having one of the lowest misclassification rates. One of the assumptions of Naive Bayes is that given the class, the predictors are independent. I think this can be assumed because if we are given that a purchase was fraudulent, whether a purchase is large or not does not give us any information about the location of the purchase. One drawback of Naive Bayes is that it would be harder to interpret to non-domain experts, so maybe we want to look at the logistic regression model. 
 
+#### Averey Copeland Individual Section
+# Create the training dataset as above using seed=200
+# Create a testing dataset using 204
+```{r}
+library(naivebayes)
+set.seed(200)
+n = 1000
+
+
+#Generative model
+set.seed(204) 
+
+n = 1000
+X1 <- runif(n,0,1)
+X2 <- runif(n,0,1)
+
+#I'm going to use a for loop to generate 1000 y's
+Y <- rep(0,n) #initializing my Y to be a vector of 0's
+for (i in 1:n) {
+  Y[i] <- generate_y(X1[i],X2[i])
+}
+
+testingdata <- cbind(X1,X2,Y)
+
+trainingdata <- as.data.frame(trainingdata)
+testingdata <- as.data.frame(testingdata)
+model1 <- glm(Y~X1+X2,data=trainingdata,family="binomial")
+model2 <- lda(Y~X1+X2,data=trainingdata)
+model3 <- qda(Y~X1+X2,data=trainingdata)
+#Kept getting error: Y has to be a factor so as.factor(Y) fixes that
+model4 <- naive_bayes(as.factor(Y)~X1+X2,data=trainingdata)
+model5 <- knn(train = trainingdata[,1:2], test = testingdata[,1:2], cl=trainingdata[,3],k=8)
+
+#logistic model
+prob1 <- predict(model1, newdata = testingdata, type = 'response')
+pred1 <- ifelse(prob1>.5, 1,0)
+
+confusion_matrix <- table(True=testingdata$Y, Pred=pred1)
+confusion_matrix
+#Sensitivity = TP/(TP+FN)
+Logisticsens <-  35/455
+Logisticsens
+
+
+#Specificity = TN/(TN+FP)
+Logisticspec <-  532/550
+Logisticspec
+
+
+#Total Error
+logisticerr <- (13+420)/(13+420+532+35)
+logisticerr
+
+
+#LDA model
+prob2 <- predict(model2, newdata=testingdata, type = 'response')
+class <- prob2$class
+misclassification <- mean(class!=testingdata$Y)
+confusion_matrix2 <- table(True=testingdata$Y, class)
+confusion_matrix2
+
+#Sensitivity
+LDAsens <- 35/(35+420)
+LDAsens
+
+#Specificity
+LDAspec <- 534/(534+11)
+LDAspec
+
+#Error Rate
+LDAerr <- (11+420)/(35+534+11+420)
+LDAerr
+
+
+#QDA
+prob3 <- predict(model3, newdata=testingdata, type = 'response')
+class <- prob3$class
+misclassification <- mean(class!=testingdata$Y)
+confusion_matrix3 <- table(True=testingdata$Y, class)
+confusion_matrix3
+
+#Sensitivity
+QDASense<- 89/(89+366)
+QDASense
+
+#Specificity
+QDAspec <- 494/(494+51)
+QDAspec
+
+#Error Rate
+QDAerr <- (51+366)/(51+366+89+494)
+QDAerr
+
+#NAIVE BAYES
+prob4 <- predict(model4, newdata=testingdata)
+
+misclassification <- mean(prob4!=testingdata$Y)
+confusion_matrix4 <- table(True=testingdata$Y, prob4)
+confusion_matrix4
+
+#Sensitivity
+NBSense<- 66/(66+389)
+NBSense
+
+#Specificity
+NBspec <- 507/(507+38)
+NBspec
+
+#Error Rate
+NBerr <- (38+389)/(507+66+38+389)
+NBerr
+
+
+#KNN
+
+confusion_matrix5 <- table(testingdata$Y, model5)
+confusion_matrix5
+
+#Sensitivity
+KNNSense<- 155/(155+300)
+KNNSense
+
+#Specificity
+KNNspec <- 423/(423+122)
+KNNspec
+
+#Error Rate
+KNNerr <- (122+300)/(122+300+423+155)
+KNNerr
+
+#Point prediction (.75, .25)
+point <- data.frame(x1=c(.75), x2=c(.25))
+
+logistic<-predict(model1, point)
+LDA<-predict(model2, point)
+QDA<-predict(model3, point)
+NB<-predict(model4, point)
+#logistic
+#LDA
+#QDA
+#NB
+
+#RESULTS
+tab <- matrix(c(0.077,0.195,0.196,0.145,0.340,
+                0.979,0.979,0.906,0.930,0.776,
+                0.431,0.431,0.417,0.427,0.422,
+                0,0,0,0,0),byrow=TRUE, nrow=4)
+rownames(tab) <- c('Specificity.', 'Sensitivity', 'Error', 'Prediction')
+colnames(tab) <- c('Logistic','LDA','QDA','ND','KNN')
+results <- data.frame(tab)
+results
+```
+Q1: Lets say that this model predicts whether or not a pitch in baseball is a strike or a ball after only traveling 10 feet. Where Y is whether the baseball ended up being a strike or not. X1 is the height of the pitch after traveling 10 feet, x2 is the distance from the left batters box horizontally (0 touching the left batters box). 
+
+Q2: This is the summary of each model
+
+Q3: Given the relatively high error across all models, this could morally lead to players misjudging where a pitch might end up causing a batters batting average to decrease instead of increase as if the model was connected to a buzzer, this could lead the batter to not swing at pitches that they normally would have. Given the point (.75,.25) the batter would choose to take this pitch and hope it is a ball.
+
+
 #### What teams need to do
 
 1.  Summarize the models' performance using all of the results from each individual.
