@@ -1,0 +1,54 @@
+---
+title: "Lab2"
+author: "STAT 4610/5610 Spring 2026"
+format: pdf
+editor: visual
+date: 2026-02-20
+---
+
+## Lab2: Comparing Nonlinear Regressions
+
+**Due: 11:59PM Friday, February 27 on Canvas as a knitted pdf file of your team's Quarto document**
+
+1.  You will individually fit **six** nonlinear regression models on a single X variable from your team's chosen dataset. You will use CV (including the built-in LOOCV functions in R) on at least three of these models to determine the best tuning parameters (e.g., $\lambda$ , K number of knots or steps, or degrees of freedom). You will compare the six models, choose the best one, make a prediction at an important value of X, interpret the results, and comment on the ethics of the situation.
+2.  Teams will use the individual contributions to build a Generalized Additive Model (GAM), fit it, make predictions, make interpretations, show visualizations, etc.
+3.  Each individual will comment on how they contributed to their team's GAM.
+
+### Instructions for Lab2
+
+In HW2, you applied several types of shrinkage and selection methods for linear models (shrinkage and selection methods) on a dataset of your choosing. This lab will be similar, but you will apply the nonlinear regression methods of Chapter 7 in *ISLR2* and use cross validation to choose the tuning parameters and select the best method. Individuals will model individual variables from the same dataset (one variable for each team member) and then combine their work into one team GAM that uses multiple X variables to predict Y.
+
+#### What teams need to do first
+
+1.  Choose a dataset that has enough interesting X variables that you can combine to model/predict Y. You can use one of the datasets that a teammate used for HW2 or pick a new one. You cannot use the Wage data from *ISLR2*.
+2.  Decide who will model which X variable individually and when they need to be done to contribute to the team GAM.
+
+#### What individuals need to do
+
+1.  Given your team's dataset and your X variable, fit a polynomial regression, step function regression, cubic spline, natural spline, smoothing spline, and a local regression (six models).
+2.  Use CV to determine the optimal tuning parameters for at least three of your models. Sometimes just choosing the tuning parameter (e.g., picking the number of cuts in X for a step function regression) based on your knowledge of Q1 and Q3 makes more sense than using CV.
+3.  Compare the CV MSE or other appropriate model summary (e.g., misclassification rate) for your models. Choose the best model method.
+4.  At an important or significant value of X (explain why that value of x0 is important or significant), use your model to predict Y at that value.
+5.  Interpret your prediction and generally what the model is telling you about Y.
+6.  Comment on any ethical implications of this work.
+7.  Optional: Create visualizations of your models or just of the best model.
+
+#### What teams need to do
+
+1.  Create a GAM based on the work of your individual team members.
+2.  Visualize the GAM (R has some good built-in plotting functions, such as plot.gam()).
+3.  Choose a value of X that is important or interesting (explain why) and use that point to make a prediction for Y. Interpret this prediction.
+4.  How does the GAM compare with a linear method (e.g., lasso, ridge, PCR, etc.)?
+
+#### Individual contributions to team GAM
+
+Each individual must comment on their contributions to the team GAM. For example, write something like: ‘I told person X that my results showed that the natural spline with 4 knots was the best model for variable x1. Then I created a visualization to help interpret the GAM.’ Or, ‘I used the GAM to make a prediction for the point x0.’ Or, ‘I didn’t actually do anything for the team section.’ Only individuals who contribute to the team section will get points for the team section.
+
+#### **Some intended outcomes from this assignment:**
+
+-   You will individually get practice fitting a nonlinear regression models: polynomial regression, step function regression, cubic spline, natural spline, smoothing spline, and local regression
+-   You will practice using CV to select the optimal tuning parameters of your models
+-   You will use CV to compare the performance of these models
+-   You will make predictions based on your models
+-   You will practice fitting and interpreting a GAM
+-   You will gain experience working on a data science "project" as a team
