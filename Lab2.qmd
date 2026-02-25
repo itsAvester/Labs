@@ -102,8 +102,35 @@ lassopredict <- predict(lassohittermodel, s=lambda.lasso, newx=x_test)
 lasso_mse <- mean((lassopredict - test$Salary)^2)
 lasso_mse
 ```
-
 The lambda parameter for the Lasso method was selected using cross-validation. The MSE from the lasso was around 1106.
+
+```{r}
+#Ridge Regression Model for Comparison
+library(glmnet)
+
+Hitters2 <- na.omit(Hitters)
+
+set.seed(123)
+
+ridge_rows <- sample(x=nrow(Hitters2), size=floor(0.75*nrow(Hitters2)), replace=FALSE)
+ridge_train <- Hitters2[ridge_rows,]
+ridge_test <- Hitters2[-ridge_rows,]
+
+x_ridge_train <- model.matrix(Salary~., data=ridge_train)[,-1]
+y_ridge_train <- ridge_train$Salary
+
+ridge_model <- cv.glmnet(x=x_ridge_train, y=y_ridge_train, family="gaussian", nfolds=10,
+                         standardize=TRUE, alpha=0,type.measure="mse")
+ridge_lambda <- ridge_model$lambda.min
+
+x_ridge_test <- model.matrix(Salary~., data=ridge_test)[,-1]
+y_ridge_test <- ridge_test$Salary
+
+ridge_pred <- predict(ridge_model, s=ridge_lambda, newx=x_ridge_test)
+ridge_mse <- mean((ridge_pred-y_ridge_test)^2)
+ridge_mse
+```
+The ridge model that we will compare to our GAM to had an mse of 127917.5
 
 Insert analysis here about how the lasso compared to our GAM, when we have completed it. 
 
@@ -113,6 +140,7 @@ Insert analysis here about how the lasso compared to our GAM, when we have compl
 Each individual must comment on their contributions to the team GAM. For example, write something like: ‘I told person X that my results showed that the natural spline with 4 knots was the best model for variable x1. Then I created a visualization to help interpret the GAM.’ Or, ‘I used the GAM to make a prediction for the point x0.’ Or, ‘I didn’t actually do anything for the team section.’ Only individuals who contribute to the team section will get points for the team section.
 
 Corva: I did lasso model selection so that we could compare it to our GAM.
+Parker: Did Ridge model to compare to GAM
 
 #### **Some intended outcomes from this assignment:**
 
