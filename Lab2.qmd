@@ -226,6 +226,178 @@ It appears that, for a player with 1,000 career RBIs, their predicted salary wou
 
 CRBI might not be the best predictor of Salary if major league baseball executives were trying to figure out what salary to pay players based on their playing statistics. Excellent players on terrible teams will have lower CRBI values than if they were on excellent teams because it is more likely to get an RBI if your teammates are already on base. In order to get a clearer view of what to pay their players, major league baseball executives should take into account all statistics and situations of each individual player.
 
+## Parker Individual Section
+
+```{r}
+#Polynomial Regression
+set.seed(123)
+
+poly_reg <- glm(Salary ~ poly(Hits, 2), data=Hitters2, family="gaussian")
+x_grid <- seq(min(Hitters2$Hits),
+              max(Hitters2$Hits),
+              length.out = 200)
+poly_pred <- predict(poly_reg, newdata = data.frame(Hits = x_grid))
+plot(Hitters2$Hits, Hitters2$Salary)
+lines(x_grid, poly_pred, lwd=2, col="red")
+
+#Five Fold Cross Validation for Polynomial Regression
+
+poly_reg_cv <- cv.glm(data=Hitters2, glmfit=poly_reg, K=5)
+
+poly_reg_cv$delta[1]
+```
+```{r}
+#Step Function Regression
+
+#Cross Validation to Find the Optimal Number of Cuts
+set.seed(123)
+cuts <- 1:10
+hits_range <- range(Hitters2$Hits)
+step_results <- rep(NA,9)
+
+for (k in 2:10){
+  breaks <- seq(hits_range[1], hits_range[2], length.out = k + 1)
+  
+  step_model <- glm(Salary ~ cut(Hits, breaks = breaks, include.lowest = TRUE), data=Hitters2)
+  cv_cut <- cv.glm(data=Hitters2, glmfit=step_model, K=5)
+  
+  step_results[k]=cv_cut$delta[1]
+}
+
+best_cut <- which.min(step_results)
+
+#Step Regression With Optimal Number of Cuts
+  
+x_grid <- seq(min(Hitters2$Hits),
+              max(Hitters2$Hits),
+              length.out = 200)
+
+step_reg <- glm(Salary ~ cut(Hits, 4), data=Hitters2)
+step_pred <- predict(step_reg, newdata=data.frame(Hits = x_grid))
+plot(Hitters2$Hits, Hitters2$Salary)
+lines(x_grid, step_pred, lwd=2, col="red")
+
+#Five Fold Cross Validation Step Function
+
+step_results[4]
+```
+```{r}
+#Cubic Spline
+
+#Find the Optimal Number of Knots for Cubic Spline
+set.seed(123)
+
+cubic_results <- rep(NA,10)
+hit_limits <- range(Hitters2$Hits)
+
+for (k in 1:10){
+  probs <- seq(0, 1, length.out = k + 2)[-c(1, k + 2)]
+  knots <- quantile(Hitters2$Hits,probs)
+  
+  cubic_model <- glm(Salary~bs(Hits, knots=knots, Boundary.knots=hit_limits), data=Hitters2, family="gaussian")
+  cubic_cv <- cv.glm(data=Hitters2, glmfit=cubic_model, K=5)
+  cubic_results[k] <- cubic_cv$delta[1]
+}
+
+probs_optimal <- seq(0,1,length.out=5)[-c(1,5)]
+
+cubic_spline <- glm(Salary ~ bs(Hits, knots=probs_optimal), data=Hitters2, family="gaussian")
+cubic_spline_pred <- predict(cubic_spline, newdata=data.frame(Hits = x_grid))
+
+plot(Hitters2$Hits, Hitters2$Salary)
+lines(x_grid, cubic_spline_pred, lwd=2, col="red")
+
+#Five Fold Cross Validation Cubic Spline With Optimal Number of Knots
+
+cubic_results[3]
+```
+```{r}
+#Natural Spline 
+set.seed(123)
+
+natural_spline <- glm(Salary~ns(Hits, df=3), data=Hitters2, family="gaussian")
+natural_pred <- predict(natural_spline, newdata=data.frame(Hits = x_grid))
+
+plot(Hitters2$Hits, Hitters2$Salary)
+lines(x_grid, natural_pred, lwd=2, col="red")
+
+#Cross Validation with Natural Spline
+
+natural_cv <- cv.glm(data=Hitters2,glmfit=natural_spline, K=5)
+natural_cv$delta[1]
+```
+```{r}
+#Smoothing Spline
+
+#Find the Optimal Tuning Parameter
+smooth_spline <- smooth.spline(Hitters2$Hits, Hitters2$Salary, cv=TRUE)
+best_df <- smooth_spline$df
+
+smooth_spline_optimal <- smooth.spline(Hitters2$Hits, Hitters2$Salary, df=best_df)
+smooth_pred <- predict(smooth_spline_optimal, x=x_grid,se=TRUE)
+
+plot(Hitters2$Hits, Hitters2$Salary)
+lines(x_grid, smooth_pred$y, lwd=2, col="red")
+
+#Cross Validated Error Smooth Spline
+
+smooth_cv <- smooth_spline$cv.crit
+smooth_cv
+```
+```{r}
+#Local Regression
+
+local_reg <- loess(Salary~Hits, span=.4, data=Hitters2)
+local_pred <- predict(local_reg, newdata=data.frame(Hits = x_grid))
+
+plot(Hitters2$Hits,Hitters2$Salary)
+lines(x_grid, local_pred, lwd=2, col="red")
+
+
+#Cross Validation For Local Regression With Span=0.4
+set.seed(123)
+K<-5
+span=0.4
+folds <- sample(rep(1:5, length.out=nrow(Hitters2)))
+
+mse <- function(actual, predicted){
+  mean((actual-predicted)^2)
+}
+
+mse_vals <- numeric(5)
+
+for (i in 1:5){
+  training_data <- Hitters2[folds!=i,]
+  testing_data <- Hitters2[folds==i,]
+  
+  loess_model <- loess(Salary~Hits, span=0.4, data=training_data)
+  predictions <- predict(loess_model, newdata=testing_data)
+  
+  valid_idx <- !is.na(predictions)
+  
+  mse_vals[i] <- mse(testing_data$Salary[valid_idx],predictions[valid_idx])
+}
+
+mean(mse_vals)
+```
+Comparing the six models, the best model in terms of MSE is the local regression model with a span of 0.4. This model had an MSE of 152988. The worst models, although not by too much, were the polynomial regression and the cubic spline. I chose the local regression model because it had the lowest cross validated error. 
+
+```{r}
+#Using Local Regression Model for Prediction
+local_reg <- loess(Salary~Hits, span=0.4, data=Hitters2)
+
+warm_bern <- data.frame(Hits=35)
+warm_bern_pred <- predict(local_reg, newdata=warm_bern)
+warm_bern_pred
+```
+
+I'll pretend that I am some executive at the Colorado Rockies, and we are trying to come up with reasonable salary propositions for players who are at the end of their contract. We are are specifically looking at Warming Bernabel, who had 35 hits in the 2025 season for the Rockies, Using our model, a reasonable salary is 325,689 dollars a year for however long the contract is.
+
+There are not many ethical implications of the model because the data is publicly available; the model does not intake sensitive information that we need to worry about being leaked. The local regression model should also be easily interpretable visually, so there is not much of a worry for the misuse or misinterpretation of the model among stakeholders. 
+
+
+
+
 #### What teams need to do
 
 1.  Create a GAM based on the work of your individual team members.
