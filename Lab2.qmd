@@ -73,6 +73,159 @@ Corva will do CRBI
 6.  Comment on any ethical implications of this work.
 7.  Optional: Create visualizations of your models or just of the best model.
 
+## Corva Individual Section
+
+I will do CRBI
+```{r}
+#plotting CRBI against Salary
+ggplot(Hitters,
+       aes(x=CRBI
+           ,y=Salary))+
+  geom_point()
+```
+
+```{r}
+# polynomial regression
+
+cpoly1 <- glm(Salary~CRBI , data = Hitters)
+cpoly2 <- glm(Salary~poly(CRBI , 2), data = Hitters)
+cpoly3 <- glm(Salary~poly(CRBI , 3), data = Hitters)
+cpoly4 <- glm(Salary~poly(CRBI , 4), data = Hitters)
+cpoly5 <- glm(Salary~poly(CRBI , 5), data = Hitters)
+anova(cpoly1,cpoly2,cpoly3,cpoly4,cpoly5)
+
+
+#here I tuned the parameter of degrees of my polynomial using anova. I will do it again using cv 
+
+cv.poly.corva.error <- rep(0, 10)
+for (i in 1:10) {
+  glm.fit <- glm(Salary ~ poly(CRBI , i), data = Hitters)
+  cv.poly.corva.error[i] <- cv.glm(Hitters , glm.fit)$delta[1]
+}
+cv.poly.corva.error
+
+
+corvapolyfit <- glm(Salary~poly(CRBI,2), data=Hitters)
+
+cpolyerror <- cv.glm(Hitters, corvapolyfit)$delta[1]
+#126064
+```
+
+In the ANOVA output, the p-value comparing Model 1 and Model 2 is close to zero. Adding the quadratic term is significant. However, the p-value comparing Model 2 and Model 3 is around 0.367, indicating that adding a cubic term would not be significant. My cross-validated error has a sharp drop in the test MSE between the linear and the quadratic term but then goes back up again with a cubic term. Both of these suggest that I choose a quadratic for my polynomial regression.
+
+
+```{r}
+#step function regression
+
+# table(cut(Hitters$Salary,4))
+#the cut() function chooses our step to be at 666, 1260, and 1860 thousand if we cut the data into 4 but also those look pretty unbalanced so let's do quantiles instead
+
+salaryhittersquantile <- quantile(Hitters$CRBI, probs = seq(0, 1, 0.25))
+
+Hitters.Salary.Quantiles <- Hitters 
+Hitters.Salary.Quantiles$Bins <- cut(
+  Hitters.Salary.Quantiles$CRBI,
+  breaks=salaryhittersquantile,
+  include.lowest=TRUE
+)
+
+corvastepfit <- glm(Salary~Bins, data=Hitters.Salary.Quantiles)
+csteperror <- cv.glm(Hitters.Salary.Quantiles, corvastepfit, K=10)$delta[1]
+# 129688
+```
+
+```{r}
+#cubic spline
+
+#can't use cv.glm so we will use caret package to make the model and find cv error
+#we will look at quantiles of the CRBI for our knots
+
+traincontrol <- trainControl(method = "cv", number = 10) # this means we will do 10-fold CV
+corvacubicsplinefit <- train(Salary ~ bs(CRBI, df = 4), 
+                               data = Hitters, 
+                               method = "lm", 
+                               trControl = traincontrol) #df=4 means we have knots at the 25, 50, and 75th percentiles of CRBI
+ccubicerror <- corvacubicsplinefit$results$RMSE^2 
+#129651.1
+
+```
+
+```{r}
+#natural spline
+
+traincontrol <- trainControl(method = "cv", number = 10) # this means we will do 10-fold CV
+corvanaturalsplinefit <- train(Salary ~ ns(CRBI, df = 4), 
+                               data = Hitters, 
+                               method = "lm", 
+                               trControl = traincontrol) #df=4 means we have knots at the 25, 50, and 75th percentiles of CRBI
+cnaturalerror <- corvanaturalsplinefit$results$RMSE^2 
+#114827.4
+
+```
+
+```{r}
+#smoothing spline
+
+corvasmoothingsplinefit <- smooth.spline(Hitters$CRBI , Hitters$Salary , cv = FALSE)
+
+
+#here, cv=FALSE because there are non-unique CRBI values. This means we don't do LOOCV but instead do cross-validation with Generalized cross-validation to select the lambda. cross-validated lambda is around 31
+
+#Here, I tuned my lambda parameter, It is built in to the smooth.spline() functon
+
+csmootherror <- corvasmoothingsplinefit$cv.crit # this is GCV not CV because we have some repeat x values
+# 113303
+```
+
+```{r}
+#local regression
+
+#corvalocalfit <- loess(Salary ~ CRBI , span = .2, data = Hitters)
+#corvalocalfit2 <- loess(Salary~CRBI , span = .5, data = Hitters)
+
+#above is how I would do it if i had a span of 20% or 50% of the data - from ISLR2
+
+#trying to tune this parameter of span - don't want to do this by hand so using package fANCOVA
+#this will find the optimal span for the lowest gcv
+corvalocalfit <- loess.as(x=Hitters$CRBI,
+                          y=Hitters$Salary,
+                          criterion="gcv") #regular cv won't work bc duplicate x vals
+
+summary(corvalocalfit) #span of 0.2283372
+
+#unfortunately fANCOVA uses GCV to find the best span but doesn't keep the actual GCV value so must be calculated manually. Use the formula (7.52) in ESL
+
+str(corvalocalfit)
+localN <- 263 #we have 263 players
+localnumerator <- sum(corvalocalfit$residuals^2)/localN
+localtraceS <- corvalocalfit$enp #this is "effective number of parameters"
+
+clocalerror <- localnumerator/(1-localtraceS/localN)^2
+#1164654.4
+```
+
+```{r}
+corvaresults <- c(cpolyerror,csteperror,ccubicerror,cnaturalerror,csmootherror,clocalerror)
+corvaresults
+```
+
+It appears that the best model for CRBI, based on cross-validated error, is the smoothing spline.
+
+A significant number of career RBI is 1000. Generally, based on my knowledge of the game, 100 RBIs per season marks an excellent player/team, and around 1000 career RBIs would be indicative of a great career player. 
+
+```{r}
+#making prediction
+
+corvapredsmooth <- predict(corvasmoothingsplinefit, x=1000)
+corvapredsmooth
+
+median(Hitters$Salary)
+```
+
+It appears that, for a player with 1,000 career RBIs, their predicted salary would be 1455 thousand dollars. The median salary for all players in the Hitters dataset is 425 thousand, so 1455 thousand dollars is a very high salary. This makes sense - players with such a high amount of career RBIs would be paid more.
+
+CRBI might not be the best predictor of Salary if major league baseball executives were trying to figure out what salary to pay players based on their playing statistics. Excellent players on terrible teams will have lower CRBI values than if they were on excellent teams because it is more likely to get an RBI if your teammates are already on base. In order to get a clearer view of what to pay their players, major league baseball executives should take into account all statistics and situations of each individual player.
+
 #### What teams need to do
 
 1.  Create a GAM based on the work of your individual team members.
