@@ -8,6 +8,32 @@ date: 2026-02-20
 
 ## Lab2: Comparing Nonlinear Regressions
 
+
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+
+install.packages("splines")
+library(splines)
+
+install.packages("ISLR2")
+library(ISLR2)
+
+install.packages("fANCOVA")
+library(fANCOVA)
+
+install.packages("boot")
+library(boot)
+
+install.packages("olsrr")
+library(olsrr)
+
+install.packages("caret")
+library(caret)
+
+```
+
+
 **Due: 11:59PM Friday, February 27 on Canvas as a knitted pdf file of your team's Quarto document**
 
 1.  You will individually fit **six** nonlinear regression models on a single X variable from your team's chosen dataset. You will use CV (including the built-in LOOCV functions in R) on at least three of these models to determine the best tuning parameters (e.g., $\lambda$ , K number of knots or steps, or degrees of freedom). You will compare the six models, choose the best one, make a prediction at an important value of X, interpret the results, and comment on the ethics of the situation.
@@ -22,6 +48,20 @@ In HW2, you applied several types of shrinkage and selection methods for linear 
 
 1.  Choose a dataset that has enough interesting X variables that you can combine to model/predict Y. You can use one of the datasets that a teammate used for HW2 or pick a new one. You cannot use the Wage data from *ISLR2*.
 2.  Decide who will model which X variable individually and when they need to be done to contribute to the team GAM.
+
+
+```{r}
+data(Hitters)
+
+pairs(Hitters)
+
+#remove missing values
+Hitters <- na.omit(Hitters)
+```
+
+Our Y value will be Salary.
+
+Corva will do CRBI
 
 #### What individuals need to do
 
@@ -40,9 +80,39 @@ In HW2, you applied several types of shrinkage and selection methods for linear 
 3.  Choose a value of X that is important or interesting (explain why) and use that point to make a prediction for Y. Interpret this prediction.
 4.  How does the GAM compare with a linear method (e.g., lasso, ridge, PCR, etc.)?
 
+
+```{r}
+# linear method Lasso
+
+set.seed(123)
+rowsHitters <- sample(x=nrow(Hitters), size=floor(0.75*nrow(Hitters2)), replace=FALSE)
+train <- Hitters[rowsHitters,]
+test <- Hitters[-rowsHitters,]
+
+x_train <- model.matrix(Salary ~ ., data = train)[, -1]
+y_train <- train$Salary
+
+lassohittermodel <- cv.glmnet(x=x_train,y=y_train,family="gaussian",
+                      standardize=TRUE,alpha=1, nfolds=10, type.measure="mse")
+lambda.lasso <- lassohittermodel$lambda.min
+
+x_test <- model.matrix(Salary ~ ., data = test)[, -1]
+y_test <- test$Salary
+lassopredict <- predict(lassohittermodel, s=lambda.lasso, newx=x_test)
+lasso_mse <- mean((lassopredict - test$Salary)^2)
+lasso_mse
+```
+
+The lambda parameter for the Lasso method was selected using cross-validation. The MSE from the lasso was around 1106.
+
+Insert analysis here about how the lasso compared to our GAM, when we have completed it. 
+
+
 #### Individual contributions to team GAM
 
 Each individual must comment on their contributions to the team GAM. For example, write something like: ‘I told person X that my results showed that the natural spline with 4 knots was the best model for variable x1. Then I created a visualization to help interpret the GAM.’ Or, ‘I used the GAM to make a prediction for the point x0.’ Or, ‘I didn’t actually do anything for the team section.’ Only individuals who contribute to the team section will get points for the team section.
+
+Corva: I did lasso model selection so that we could compare it to our GAM.
 
 #### **Some intended outcomes from this assignment:**
 
