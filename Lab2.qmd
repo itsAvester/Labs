@@ -395,7 +395,119 @@ I'll pretend that I am some executive at the Colorado Rockies, and we are trying
 
 There are not many ethical implications of the model because the data is publicly available; the model does not intake sensitive information that we need to worry about being leaked. The local regression model should also be easily interpretable visually, so there is not much of a worry for the misuse or misinterpretation of the model among stakeholders. 
 
+###Averey Individual Section
+```{r}
+data(Hitters)
+set.seed(100)
+Hitters2 <- na.omit(Hitters)
+rows <- sample(x=nrow(Hitters2),size=floor(0.75*nrow(Hitters2)),replace=FALSE)
 
+
+training <- Hitters[rows,]
+training<- na.omit(training)
+testing <- Hitters[-rows,]
+y_test  <- testing$Salary
+
+
+#Polynomial Regression
+
+pfit2 <- glm(Salary~poly(CHmRun , 3), data = Hitters2, family = "gaussian")
+leng <- 1:10
+for (i in leng) {
+  fit <- glm(Salary ~ poly(CHmRun, i), data = Hitters2)
+  leng[i] <- cv.glm(Hitters2, fit, K = 10)$delta[1]
+}
+
+best_degree <- degrees[which.min(leng)]
+best_degree
+min(leng)
+#Selected 3
+#10 Fold cv
+polynomialcv <- cv.glm(data=Hitters2, glmfit = pfit2, K=10)
+polynomialcv$delta[1]
+#136161.2
+
+#Step Regression
+table(cut(Hitters2$Salary ,3))
+breaks <- unique(quantile(Hitters2$CHmRun, probs = seq(0, 1, 0.25), na.rm=TRUE))
+
+fit3 <- glm(Salary~cut(CHmRun, breaks = breaks, include.lowest=TRUE), data=Hitters2)
+cvfit3 <- cv.glm(Hitters2, fit3, K=10)$delta[1]
+cvfit3
+#146857.2
+
+#Cubic splines
+library (splines)
+range = range(Hitters2$CHmRun)
+fit3 <- glm(Salary ~ bs(CHmRun , knots = c(100, 180, 250),Boundary.knots=range), data = Hitters2)
+#10 fold CV
+cubiccv <- cv.glm(data=Hitters2, glmfit = fit3, K=10)
+cubiccv$delta[1]
+#2724092
+
+#NATURAL SPLINE
+knots <- quantile(Hitters2$CHmRun, na.rm=TRUE)
+summary(knots)
+fit4 <- glm(Salary~ns(CHmRun, knots=c(15,40,92.5,139.1)), data = Hitters2)
+#summary(fit4)
+nscv <- cv.glm(Hitters2, fit4, K = 10)
+nscv$delta[1]
+#143751.5
+
+library(splines)
+library(caret)
+knot.counts <- 1:10 
+# Create a data frame to store the results
+cv.results <- data.frame(knots = knot.counts, cv.error = NA)
+# Perform cross-validation for each number of knots
+for (i in 1:length(knot.counts)) {
+  num.knots <- knot.counts[i]
+  folds <- createFolds(Hitters2$Salary, k = 10) # 10-fold CV
+  fold.errors <- numeric(length(folds))
+  # Perform cross-validation
+  for (j in 1:length(folds)) {
+    train.data <- Hitters2[-folds[[j]], ]
+    test.data <- Hitters2[folds[[j]], ]
+
+    # Fit the natural spline model
+    spline.model <- lm(Salary ~ ns(CHmRun, knots = quantile(train.data$CHmRun, seq(0, 1, length.out = num.knots + 2))[-c(1, num.knots+2)]), data = train.data) 
+    predictions <- predict(spline.model, newdata = test.data)
+    fold.errors[j] <- mean((test.data$Salary - predictions)^2)
+  }
+  cv.results$cv.error[i] <- mean(fold.errors)
+}
+
+optimal.knots <- cv.results$knots[which.min(cv.results$cv.error)]
+
+final.spline.model <- lm(Salary ~ ns(CHmRun, knots = quantile(Hitters2$CHmRun, seq(0, 1, length.out = optimal.knots + 2))[-c(1, optimal.knots+2)]), data = Hitters2)
+cat(min(cv.results$cv.error))
+#137664
+
+#SMOOTH SPLINE
+
+fit5 <- smooth.spline(Hitters2$CHmRun, Hitters2$Salary, cv=TRUE)
+
+smoothcv <- fit5$cv.crit
+smoothcv
+#137864.9
+
+#LOCAL REGRESSION
+fit6 <- loess(Salary~CHmRun, span = .5, data = Hitters2)
+pred <- predict(fit6)
+local <- mean((Hitters2$Salary - pred)^2, na.rm = TRUE)
+local
+#127972.2
+
+#Question 4
+x0 <- median(Hitters2$CHmRun)
+#40
+
+predict(pfit2, newdata=data.frame(CHmRun=40))
+#457.9133 
+```
+With a prediction of 457.9133 the model predicts that the median baseball player as far as career home runs makes a salary of 457,000 dollars. 
+
+Ethically, this model could be troublesome as in theory, a team could use this model as a reference for how much to play an experienced player leading to an organization overpaying or underpaying what would have been done without the existence of the model. A team could also overly rely on the model and end up getting a group of players that don't have high rates of success together since they might all be hitting focused players and lack on defensive ability. 
 
 
 #### What teams need to do
