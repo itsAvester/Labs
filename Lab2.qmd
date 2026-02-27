@@ -517,6 +517,20 @@ Ethically, this model could be troublesome as in theory, a team could use this m
 3.  Choose a value of X that is important or interesting (explain why) and use that point to make a prediction for Y. Interpret this prediction.
 4.  How does the GAM compare with a linear method (e.g., lasso, ridge, PCR, etc.)?
 
+```{r}
+#Create GAM model and plot it
+set.seed(123)
+rows <- sample(x=nrow(Hitters2), size=floor(0.75*nrow(Hitters2)), replace=FALSE)
+train <- Hitters2[rows,]
+test <- Hitters2[-rows,]
+install.packages("gam")
+library(gam)
+GAM_model <- gam(Salary~lo(Hits, span=0.4)+poly(CHmRun,3)+s(CRBI,5), data=train)
+
+plot.Gam(GAM_model, se=TRUE, col="red")
+
+```
+
 
 ```{r}
 # linear method Lasso
@@ -550,7 +564,7 @@ Insert analysis here about how the lasso compared to our GAM, when we have compl
 Each individual must comment on their contributions to the team GAM. For example, write something like: ‘I told person X that my results showed that the natural spline with 4 knots was the best model for variable x1. Then I created a visualization to help interpret the GAM.’ Or, ‘I used the GAM to make a prediction for the point x0.’ Or, ‘I didn’t actually do anything for the team section.’ Only individuals who contribute to the team section will get points for the team section.
 
 Corva: I did lasso model selection so that we could compare it to our GAM.
-
+Parker: Put together everyones models and put them into the team GAM
 
 #### **Some intended outcomes from this assignment:**
 
