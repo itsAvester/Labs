@@ -525,12 +525,19 @@ train <- Hitters2[rows,]
 test <- Hitters2[-rows,]
 install.packages("gam")
 library(gam)
-GAM_model <- gam(Salary~lo(Hits, span=0.4)+poly(CHmRun,3)+s(CRBI,5), data=train)
+GAM_model <- gam(Salary~poly(Hits, 3)+poly(CHmRun,3)+s(CRBI,5), data=train)
 
 plot.Gam(GAM_model, se=TRUE, col="red")
 
 ```
+We didn't end up using the local regression in the GAM because the local regression does not predict for value that fall outside the range of data in the training set, so we weren't able to use the model for prediction. We replace the local regression for the Hits variable with third degree polynomial regression.
+```{r}
+Hunter_Good <- data.frame(Hits=150,CHmRun=45,CRBI=144)
 
+Hunter_Good_pred <- predict(GAM_model, newdata=Hunter_Good)
+Hunter_Good_pred
+```
+If we are the Colorado Rockies and we are looking to extend the contract of Hunter Goodman, then what would be a competitive salary? According to the GAM model, ____ dollars a year is an appropriate salary for Hunter Goodman. 
 
 ```{r}
 # linear method Lasso
@@ -556,8 +563,13 @@ lasso_mse
 The lambda parameter for the Lasso method was selected using cross-validation. The MSE from the lasso was around 1106.
 
 
-Insert analysis here about how the lasso compared to our GAM, when we have completed it. 
+```{r}
+GAM_pred <- predict(GAM_model, newdata=test)
 
+mse_GAM <- mean((GAM_pred-test$Salary)^2)
+mse_GAM
+```
+Insert analysis here about how the lasso compared to our GAM, when we have completed it. 
 
 #### Individual contributions to team GAM
 
