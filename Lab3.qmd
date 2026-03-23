@@ -77,11 +77,22 @@ How well will various SVMs predict Y given new x1 and x2 values?
 Each individual will generate a test set of 100 predictors (x1, x2) and outcomes (y) that we will use as our "ground truth". The test dataset should be the same for each team member. Use seed=323.
 
 ```{r}
-# Create the training dataset as above using seed=321
 # Create a testing dataset using seed=323
 
 set.seed(323)
 n = 100
+
+testX1 <- runif(n,0,1)
+testX2 <- runif(n,0,1)
+
+testY <- rep(0,n) #initializing my Y to be a vector of 0's
+for (i in 1:n) {
+  testY[i] <- generate_y(testX1[i],testX2[i])
+}
+
+testing <- cbind(testX1,testX2,testY) #combining all of my variables into a training dataset
+ggplot(data=testing, aes(x=testX1, y=testX2, color=testY)) +
+  geom_point()
 ```
 
 #### What individuals need to do (20 pts)
