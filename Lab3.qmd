@@ -99,6 +99,20 @@ ggplot(data=testing, aes(x=testX1, y=testX2, color=testY)) +
 
 1.  Given the training set (seed=321), fit a ***different*** SVM for each team member. Choose from the options below:
     1.  linear SVM (this will be a support vector classifier, i.e., a flat hyperplane \[actually just a line\])
+
+```{r}
+svctune <- tune(svm , 
+                Y~., 
+                data = data.frame(training) , 
+                kernel = "linear", 
+                ranges = list(cost = c(0.001 , 0.01, 0.1, 1, 5, 10, 100)))
+summary(svctune)
+
+bestsvc <- svctune$best.model
+summary(bestsvc)
+```
+
+
     2.  SVM with an interaction between X1 and X2
     3.  SVM with degree 2 polynomials
     4.  SVM with degree 3 polynomials
