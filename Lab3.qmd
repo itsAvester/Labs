@@ -184,7 +184,7 @@ train$y[train$y == 0] <- -1
 test$yt <- as.numeric(as.character(test$yt))
 test$yt[test$yt == 0] <- -1
 ```
-### 1,2
+#### 1,2
 
 ```{r}
 #Fit and cross validate for paramteters of svm
@@ -201,7 +201,7 @@ svm_tune$best.parameters
 
 svm_fit <- svm(y~., data=train, kernel="polynomial",degree=2,cost=10,gamma=0.5)
 ```
-# 3
+#### 3
 
 Unlike the maximal margin classifier, the support vector classifier allows for some points to be on the wrong side of the decision boundary. The cost parameter indicates how tolerant we are to points being on the wrong side of the boundary. The cost parameter determines how large the margin is-the area that allows for points to be on the wrong side of the decision. A large c means that we are more tolerant to violations of the decision boundary, and the margin will widen. All the points on one side of the boundary will be given the same prediction. The support vector machine allows us to deal with non linear decision boundaries by expanding the feature space using kernels. The support vector machine combines the support vector classifier with a non-linear kernel.
 
@@ -214,7 +214,7 @@ table(preds=svm_preds[1:100],truth=test$yt)
 ```
 The SVM with degree 2 polynomial had a sensitivity of 74%, specificity of 26%, and an overall error rate of 50%. 
 
-### 5
+#### 5
 
 ```{r}
 #Make prediction for point (0.25, 0.75)
