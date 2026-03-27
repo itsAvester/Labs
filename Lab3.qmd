@@ -352,14 +352,7 @@ The SVM predicts the point (.75, .25, .25*.75) is a 0.
 Comment on how the prediction differs from your prediction(s) in Lab1 and, given this new prediction, describe what actions (Q3) you recommend given your Q2 results.
 
 The model predicted a 0 in both cases. Given the new interaction term and the Q2 results, I would say its more likely than not that for this specific point it actually is a 0. However the model had a fairly high error rate at ~41.3%. So ethically there may be complications as the model under performs what I would be comfortable with implementing in circumstances where error leads to largely damaging outcomes. I would recommend gathering more data and predictors to lower this error rate in those circumstances. 
-    2.  SVM with an interaction between X1 and X2
-    3.  SVM with degree 2 polynomials
-    4.  SVM with degree 3 polynomials
-2.  Use cross validation to choose your tuning parameters.
-3.  Describe what the SVM is doing, i.e., how it classifies points.
-4.  Calculate the sensitivity, specificity, and overall error rate (misclassification rate) for your SVM given the test set of 100 data points.
-5.  Make a prediction for a new point (x1, x2) = (0.25, 0.25) or (0.25, 0.75) or (0.75, 0.25) or (0.75, 0.75) for each fitted model. Each individual will have a different point for their predictions. Use the same one you used for Lab1
-6.  Comment on how the prediction differs from your prediction(s) in Lab1 and, given this new prediction, describe what actions (Q3) you recommend given your Q2 results.
+
 
 #### What teams need to do
 
