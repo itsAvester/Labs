@@ -239,6 +239,34 @@ Compared to lab 1, this prediction is different than all of the other models tha
 
 1.  Create a new team SVM that predicts the test set better than any individual SVM.
 
+```{r}
+#create poly svm and do a lot of tuning
+
+set.seed(123)
+teamtune <- tune(svm, Y ~ .,
+                 data = training,
+                 kernel = "polynomial",
+                 scale=TRUE,
+                 ranges = list(
+                   degree=c(2,3,4),
+                   cost = c(0.01, 0.1, 1, 10),
+                   gamma = c(0.001, 0.01, 0.1, 1),
+                   coef0 = c(0, 1)),
+                 tunecontrol = tune.control(cross = 5))
+summary(teamtune)
+
+
+bestteam <- teamtune$best.model
+summary(bestteam)
+
+teampred <- predict(bestteam, testing)
+teammatrix <- confusionMatrix(data=teampred,
+                                reference=testing$Y)
+teammatrix
+
+#does ever so slightly better with an accuracy of 0.52
+```
+
 2.  Describe what the SVM is doing, i.e., how it classifies points.
 
 3.  Make a plot that summarizes the performance of the individual SVMs and your team's SVM.
