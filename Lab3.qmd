@@ -232,6 +232,126 @@ point_pred[1]
 ```
 Compared to lab 1, this prediction is different than all of the other models that we compared in lab 1, which is interesting. In the textbook it mentions that logistic regression and the support vector classifier are related, but that logistic regression performs better when the data is mixed together, and the support vector classifier works better when the data is grouped together. The fact that all of the other models in lab 1 predicted 1, I would be suspicious about the svm model. The data in our example is pretty mixed, so it would probably make more sense to use a logistic regression model over a support vector classifier. I imagine that this work is for a financial institution trying to predict fraud, and prediction accuracy is the most important metric, specifically the sensitivity of the model. Although, the svm model had a different prediction compared to the models from lab 1, the svm model has the highest sensitivity of rate of all the models. Since the financial institution is most concerned with the prediction accuracy and sensitivity rate, I think that the svm model may make the most sense in this context.  
 
+##Averey Individual Section
+
+    2.  SVM with an interaction between X1 and X2
+
+Training dataset
+
+We are going to use our generating model to create a training dataset of 1000 predictors (x1, x2), and then 1000 outcomes. Then we plot all three variables to see what our training data looks like.
+
+```{r}
+# Generate a training dataset with 1000 points
+set.seed(321)
+n = 1000
+X1 <- runif(n,0,1)
+X2 <- runif(n,0,1)
+
+#I'm going to use a for loop to generate 1000 y's
+Y <- rep(0,n) #initializing my Y to be a vector of 0's
+for (i in 1:n) {
+  Y[i] <- generate_y(X1[i],X2[i])
+}
+
+sum(Y) #How many 0's and 1's were predicted? When n is very large
+# about 48% of the Y's should be 1's. 
+
+training <- cbind(X1,X2,Y) #combining all of my variables into a training dataset
+ggplot(data=training, aes(x=X1, y=X2, color=Y)) +
+  geom_point()
+```
+How well will various SVMs predict Y given new x1 and x2 values?
+
+Test datasets
+
+Each individual will generate a test set of 100 predictors (x1, x2) and outcomes (y) that we will use as our "ground truth". The test dataset should be the same for each team member. Use seed=323.
+
+```{r}
+# Create the training dataset as above using seed=321
+# Create a testing dataset using seed=323
+set.seed(323)
+n = 100
+
+testX1 <- runif(n,0,1)
+testX2 <- runif(n,0,1)
+
+testY <- rep(0,n) #initializing my Y to be a vector of 0's
+for (i in 1:n) {
+  testY[i] <- generate_y(X1[i],X2[i])
+}
+
+testing <- cbind(X1,X2,Y) #combining all of my variables into a training dataset
+ggplot(data=testing, aes(x=X1, y=X2, color=Y)) +
+  geom_point()
+```
+
+```{r}
+#view(testing)
+```
+What individuals need to do (20 pts)
+
+Given the training set (seed=321), fit a different SVM for each team member. Choose from the options below:
+
+linear SVM (this will be a support vector classifier, i.e., a flat hyperplane [actually just a line])
+
+SVM with an interaction between X1 and X2
+
+SVM with degree 2 polynomials
+
+SVM with degree 3 polynomials
+
+Use cross validation to choose your tuning parameters.
+
+```{r}
+library(e1071)
+#interaction x1 * x2
+testing <- data.frame(X1, X2, X1*X2, Y=as.factor(Y))
+training <- data.frame(X1, X2, X1*X2, Y=as.factor(Y))
+#view(testing)
+
+fit.svm <- svm(Y~.,data=training,kernel="linear",cost=1)
+
+tune.out <- tune(svm,Y~.,data=training,kernel="linear",
+  ranges=list(cost=seq(0.01,5,length.out=100)))
+fit.svc <- tune.out$best.model
+
+fit.svc
+dim(fit.svc$coefs)[1]/dim(training)[1] # percent of data used as support vectors
+```
+
+Describe what the SVM is doing, i.e., how it classifies points.
+
+The SVM is creating a hyperplane using the 2 predictor x1 and x2 variables, as well as the interaction term x1*x2. It looks to perfectly separate the points such that $$\beta_0 +\beta_1x_1+\beta_2x_2+\beta_3x_1x_2=0$$
+
+Which looks to define anything above the plane as a 1, and anything below the plane as a -1. The interaction term helps to define where to place the plane such that it gets a more accurate prediction.
+
+Calculate the sensitivity, specificity, and overall error rate (misclassification rate) for your SVM given the test set of 100 data points.
+
+```{r}
+#view(testing)
+tab <- table(true=testing[,"Y"],pred=predict(fit.svc,newdata=testing))
+tab
+#sensitivity
+tab[2,2]/(tab[2,1]+tab[2,2])
+#specificity
+tab[1,1]/(tab[1,1]+tab[1,2])
+#Error rate
+(tab[1,2]+tab[2,1])/(tab[1,2]+tab[2,1]+tab[1,1]+tab[2,2])
+```
+Make a prediction for a new point (x1, x2) = (0.25, 0.25) or (0.25, 0.75) or (0.75, 0.25) or (0.75, 0.75) for each fitted model. Each individual will have a different point for their predictions. Use the same one you used for Lab1
+
+```{r}
+#Point prediction (.75, .25)
+point <- data.frame(X1=c(.75), X2=c(.25), X1...X2=c(.25*.75))
+
+pointpred<-predict(fit.svc, point)
+pointpred
+```
+The SVM predicts the point (.75, .25, .25*.75) is a 0.
+
+Comment on how the prediction differs from your prediction(s) in Lab1 and, given this new prediction, describe what actions (Q3) you recommend given your Q2 results.
+
+The model predicted a 0 in both cases. Given the new interaction term and the Q2 results, I would say its more likely than not that for this specific point it actually is a 0. However the model had a fairly high error rate at ~41.3%. So ethically there may be complications as the model under performs what I would be comfortable with implementing in circumstances where error leads to largely damaging outcomes. I would recommend gathering more data and predictors to lower this error rate in those circumstances. 
     2.  SVM with an interaction between X1 and X2
     3.  SVM with degree 2 polynomials
     4.  SVM with degree 3 polynomials
