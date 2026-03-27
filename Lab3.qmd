@@ -35,6 +35,12 @@ install.packages("e1071")
 library(e1071)
 install.packages("caret")
 library(caret)
+install.packages(tidyr)
+library(tidyr)
+install.packages(dplyr)
+library(dplyr)
+install.packages(ggplot2)
+library(ggplot2)
 ```
 
 ```{r}
@@ -265,6 +271,37 @@ teammatrix <- confusionMatrix(data=teampred,
 teammatrix
 
 #does ever so slightly better with an accuracy of 0.55
+```
+
+#### Team Plot
+
+```{r}
+tb <- data.frame(Model = c("Linear","Polynomial:2", "Interaction","Team SVM"),
+                 Overall_Error = c(0,0.5,0,0),
+                 Sensitivity = c(0,0.74,0,0),
+                 Specificity = c(0,0.26,0,0))
+
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+tb_long <- tb %>%
+  pivot_longer(
+    cols = -Model,
+    names_to = "Metric",
+    values_to = "Value"
+  )
+
+ggplot(tb_long, aes(x = Value, y = Model, color=Metric)) +
+  geom_point(size = 3) +
+  facet_wrap(~Metric, scales = "free_x") +
+  scale_color_manual(values = c(
+    "Error Rate" = "red",
+    "Sensitivity" = "blue",
+    "Specificity" = "darkgreen"
+  ))+
+  theme_minimal()
+
 ```
 
 2.  Describe what the SVM is doing, i.e., how it classifies points.
