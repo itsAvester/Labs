@@ -111,6 +111,7 @@ ggplot(data=testing, aes(x=testX1, y=testX2, color=testY)) +
     1.  linear SVM (this will be a support vector classifier, i.e., a flat hyperplane \[actually just a line\])
 
 ```{r}
+set.seed(123)
 svctune <- tune(svm , 
                 Y~., 
                 data = data.frame(training) , 
@@ -121,7 +122,8 @@ svctune <- tune(svm ,
                                        1, 
                                        5, 
                                        10, 
-                                       100)))
+                                       100)),
+                scale=TRUE)
 summary(svctune)
 
 bestsvc <- svctune$best.model
@@ -141,7 +143,7 @@ as.numeric(cpointpred)
 
 The Support Vector Classifier classifies points by finding a hyperplane that best separates two classes. It adds a soft margin between classes that allows some observations to be on the wrong side of the margin.
 
-After predicting on the test set, the Support Vector Classifier has a sensitivity of 0.6863, specificity of 0.4082, and a 45% misclassification rate. In this problem, Y was whether or not a borrower defaulted on their loan (default=1,no default=0), given their age(X1) and income (X2). The specific prediction is for an age 25 borrower (X1=0.25) who earns 25,000 dollars a year (X2=0.25). This SVC model predicts that the borrower will default on their loan, which is consistent with the results of Lab1. I would recommend not lending to this 25 year old borrower who earns 25,000 dollars a year since all of the models used in Lab1 in addition to this SVC model predicted that he would default on his loan. 
+After predicting on the test set, the Support Vector Classifier has a sensitivity of 1, specificity of 0, and a 49% misclassification rate. This model is probably not a good fit: the model is giving up and is only predicting the most frequent class which is 0. The data is probably not linearly separable, and the plot of X1 vs X2 confirms this. In this problem, Y was whether or not a borrower defaulted on their loan (default=1,no default=0), given their age(X1) and income (X2). The specific prediction is for an age 25 borrower (X1=0.25) who earns 25,000 dollars a year (X2=0.25). This SVC model predicts that the borrower will default on their loan, which is consistent with the results of Lab1. I would recommend not lending to this 25 year old borrower who earns 25,000 dollars a year since all of the models used in Lab1 in addition to this SVC model predicted that he would default on his loan. 
 
 
 ### Parker Individual Section
