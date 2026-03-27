@@ -116,6 +116,8 @@ ggplot(data=testing, aes(x=testX1, y=testX2, color=testY)) +
 1.  Given the training set (seed=321), fit a ***different*** SVM for each team member. Choose from the options below:
     1.  linear SVM (this will be a support vector classifier, i.e., a flat hyperplane \[actually just a line\])
 
+## Corva Individual Section
+
 ```{r}
 set.seed(123)
 svctune <- tune(svm , 
@@ -390,8 +392,8 @@ teammatrix
 
 ```{r}
 tb <- data.frame(Model = c("Linear","Polynomial:2", "Interaction","Team SVM"),
-                 Overall_Error = c(0,0.5,0,0),
-                 Sensitivity = c(0,0.74,0,0),
+                 Overall_Error = c(0.49,0.5,0,0),
+                 Sensitivity = c(1,0.74,0,0),
                  Specificity = c(0,0.26,0,0))
 
 library(tidyr)
