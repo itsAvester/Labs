@@ -275,6 +275,8 @@ teammatrix
 
 5.  In the team section of this lab, write a paragraph about individual contributions. Each individual must comment on their contributions to the lab. Only individuals who contribute to the team section will get points for the team section.
 
+Corva created the team testing set and created the team svm
+
 #### **Some intended outcomes from this assignment:**
 
 -   You will individually get practice fitting a SVM
