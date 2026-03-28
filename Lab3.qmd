@@ -445,7 +445,7 @@ The team SVM uses a radial kernel, and tunes the parameters using 5 fold cross v
 5.  In the team section of this lab, write a paragraph about individual contributions. Each individual must comment on their contributions to the lab. Only individuals who contribute to the team section will get points for the team section.
 
 Corva created the team testing set and created the team svm
-
+Averey added the explanation of what the SVM is doing, and how it classifies points.
 #### **Some intended outcomes from this assignment:**
 
 -   You will individually get practice fitting a SVM
