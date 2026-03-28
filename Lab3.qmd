@@ -437,6 +437,70 @@ ggplot(tb_long, aes(x = Value, y = Model, color=Metric)) +
 
 ```
 
+### Team Function
+```{r}
+
+#Create Function to 
+crows_func <- function(seed,testing){
+  set.seed(seed)
+  
+  training <-as.data.frame(training)
+  testing <- as.data.frame(testing)
+  
+  trainingteam <- data.frame(
+  X1 = training$X1,
+  X2 = training$X2,
+  X1X2 = training$X1 * training$X2,
+  X1_sq = training$X1^2,
+  X2_sq = training$X2^2,
+  Y = as.factor(training$Y)
+)
+  
+
+testingteam <- data.frame(
+  X1 = testing$X1,
+  X2 = testing$X2,
+  X1X2 = testing$X1 * testing$X2,
+  X1_sq = testing$X1^2,
+  X2_sq = testing$X2^2,
+  Y = as.factor(testing$Y)
+)
+
+set.seed(seed)
+teamtune <- tune(svm, Y ~ .,
+                 data = trainingteam,
+                 kernel = "radial",
+                 scale=TRUE,
+                 ranges = list(
+                   #degree=c(2,3),
+                   cost = c(0.01, 0.1, 1, 10, 100),
+                   gamma = c(0.001, 0.1, 0.25, 0.5, 1),
+                 #  coef0 = c(0, 1)),
+                 tunecontrol = tune.control(cross = 5)))
+best_model <- teamtune$best.model
+
+preds <- predict(best_model, testingteam)
+  actual <- testingteam$Y
+  
+  TP <- sum(preds == 1 & actual == 1)
+  TN <- sum(preds == 0 & actual == 0)
+  FP <- sum(preds == 1 & actual == 0)
+  FN <- sum(preds == 0 & actual == 1)
+  
+  misclass_rate <- mean(preds != actual)
+  sensitivity   <- ifelse((TP + FN) == 0, NA, TP / (TP + FN))
+  specificity   <- ifelse((TN + FP) == 0, NA, TN / (TN + FP))
+  
+  results <- data.frame(
+    Misclassification_Rate = misclass_rate,
+    Sensitivity = sensitivity,
+    Specificity = specificity
+  )
+  
+  return(results)
+}
+```
+
 2.  Describe what the SVM is doing, i.e., how it classifies points.
 The team SVM uses a radial kernel, and tunes the parameters using 5 fold cross validation to choose different cost values and gamma values. The SVM using a radial kernel works by creating a hyperplane through the points in the data such that $f(x)=\beta_0+\sum^\infty_i\alpha_ik(x,x_i)$ . Where it predicts 1 if $f(x)>0$, or -1 otherwise. $k(x,x_i)=\exp(-\gamma(||x-x_i||^2))$ and this is where our cross validation can fine tune all of these metrics to find the best model. The equation basically checks how close different points are to the support vector. Instead of having to add interaction terms manually, the kernel takes into account many with the radial kernel. The gamma parameter tells the model how much they should weight or pay attention to the support vectors. The cost parameter tells the model how much it should sacrifice when it comes to placing a boundary around points.
 
