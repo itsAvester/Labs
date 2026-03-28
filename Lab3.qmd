@@ -363,38 +363,56 @@ The model predicted a 0 in both cases. Given the new interaction term and the Q2
 ```{r}
 #create poly svm and do a lot of tuning
 
+#create radial svm with interaction
+set.seed(123)
+trainingteam <- data.frame(
+  X1 = training$X1,
+  X2 = training$X2,
+  X1X2 = training$X1 * training$X2,
+  X1_sq = training$X1^2,
+  X2_sq = training$X2^2,
+  Y = as.factor(training$Y)
+)
+
+testingteam <- data.frame(
+  X1 = testing$X1,
+  X2 = testing$X2,
+  X1X2 = testing$X1 * testing$X2,
+  X1_sq = testing$X1^2,
+  X2_sq = testing$X2^2,
+  Y = as.factor(testing$Y)
+)
 set.seed(123)
 teamtune <- tune(svm, Y ~ .,
-                 data = training,
-                 kernel = "polynomial",
+                 data = trainingteam,
+                 kernel = "radial",
                  scale=TRUE,
                  ranges = list(
-                   degree=c(2,3),
-                   cost = c(0.01, 0.1, 1, 10),
-                   gamma = c(0.001, 0.1, 0.25, 0.5, 0.75, 1),
-                   coef0 = c(0, 1)),
-                 tunecontrol = tune.control(cross = 5))
-#summary(teamtune)
+                   #degree=c(2,3),
+                   cost = c(0.01, 0.1, 1, 10, 100),
+                   gamma = c(0.001, 0.1, 0.25, 0.5, 1),
+                 #  coef0 = c(0, 1)),
+                 tunecontrol = tune.control(cross = 5)))
+summary(teamtune)
 
 
 bestteam <- teamtune$best.model
 #summary(bestteam)
 
-teampred <- predict(bestteam, testing)
+teampred <- predict(bestteam, testingteam)
 teammatrix <- confusionMatrix(data=teampred,
-                                reference=testing$Y)
+                                reference=testingteam$Y)
 teammatrix
 
-#does ever so slightly better with an accuracy of 0.55
-```
+#does ever so slightly better with an accuracy of 0.593
 
 #### Team Plot
 
 ```{r}
 tb <- data.frame(Model = c("Linear","Polynomial:2", "Interaction","Team SVM"),
-                 Overall_Error = c(0.49,0.5,.41,0.44),
-                 Sensitivity = c(1,0.74,.83,.67),
-                 Specificity = c(0,0.26,.31,.45))
+                 Overall_Error = c(0.49,0.5,.41,0.407),
+                 Sensitivity = c(1,0.74,.83,.821),
+                 Specificity = c(0,0.26,.31,.331))
 
 library(tidyr)
 library(dplyr)
