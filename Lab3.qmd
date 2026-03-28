@@ -446,6 +446,7 @@ The team SVM uses a radial kernel, and tunes the parameters using 5 fold cross v
 
 Corva created the team testing set and created the team svm
 Averey added the explanation of what the SVM is doing, and how it classifies points.
+Parker created the visualization for the svms
 #### **Some intended outcomes from this assignment:**
 
 -   You will individually get practice fitting a SVM
