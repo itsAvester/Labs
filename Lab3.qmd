@@ -474,31 +474,33 @@ teamtune <- tune(svm, Y ~ .,
                  ranges = list(
                    #degree=c(2,3),
                    cost = c(0.01, 0.1, 1, 10, 100),
-                   gamma = c(0.001, 0.1, 0.25, 0.5, 1),
+                   gamma = c(0.001, 0.1, 0.25, 0.5, 1)
                  #  coef0 = c(0, 1)),
-                 tunecontrol = tune.control(cross = 5)))
+                 ), tunecontrol = tune.control(cross = 5))
+
 best_model <- teamtune$best.model
 
 preds <- predict(best_model, testingteam)
-  actual <- testingteam$Y
+actual <- testingteam$Y
   
-  TP <- sum(preds == 1 & actual == 1)
-  TN <- sum(preds == 0 & actual == 0)
-  FP <- sum(preds == 1 & actual == 0)
-  FN <- sum(preds == 0 & actual == 1)
+TP <- sum(preds == 1 & actual == 1)
+TN <- sum(preds == 0 & actual == 0)
+FP <- sum(preds == 1 & actual == 0)
+FN <- sum(preds == 0 & actual == 1)
   
-  misclass_rate <- mean(preds != actual)
-  sensitivity   <- ifelse((TP + FN) == 0, NA, TP / (TP + FN))
-  specificity   <- ifelse((TN + FP) == 0, NA, TN / (TN + FP))
+misclass_rate <- mean(preds != actual)
+sensitivity   <- ifelse((TP + FN) == 0, NA, TP / (TP + FN))
+specificity   <- ifelse((TN + FP) == 0, NA, TN / (TN + FP))
   
-  results <- data.frame(
-    Misclassification_Rate = misclass_rate,
-    Sensitivity = sensitivity,
-    Specificity = specificity
-  )
+results <- data.frame(
+  Misclassification_Rate = misclass_rate,
+  Sensitivity = sensitivity,
+  Specificity = specificity
+)
   
-  return(results)
-}
+return(results)}
+
+#crows_func(123,testing)
 ```
 
 2.  Describe what the SVM is doing, i.e., how it classifies points.
