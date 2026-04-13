@@ -1,0 +1,133 @@
+---
+title: "Lab4: Clustering (and PCA)"
+author: "STAT 4610/5610"
+format: pdf
+editor: visual
+date: 2025-04-25
+---
+
+## **Due: 11:59PM Monday, May 5 on Canvas as a knitted pdf file of your team's Quarto document**
+
+1.  You will individually create clusters from the `Attitude` data set we've worked with in class. You will create clusters of the data points (the respondents) AND also clusters of the attitudes.
+2.  You will individually interpret the clusters of the data points and compare them to the established `Group` of respondents.
+3.  As a team, you will decide the best way to cluster this data set. You will interpret these clusters.
+
+### The Context
+
+Four groups of individuals responded to a survey about Attitudes in Collaboration conducted by Prof. Vance and Laily Mualifah, Dr. Vance's colleague in Indonesia (where he spent the 2023-24 academic year as a Fulbright Scholar experimenting how to teach interdisciplinary collaboration to Indonesian statistics and data science students). The goal of the research project is to see what differences in attitudes are held by Indonesian students compared to Indonesian professionals compared to students in the U.S.
+
+If you haven't taken the survey, you still can (for 3 bonus points) at https://forms.gle/Q7d5XVMeub5Y2DLN6. (Note: if you already took the survey you've already been given 5 bonus points. Don't take the survey a second time. If you do, your bonus score will change from 5 to 3.)
+
+#### The Survey
+
+The survey asks respondents to rate how often they have an attitude and then to what degree they think that attitude is detrimental to or beneficial for interdisciplinary collaboration. Then some demographic and experience questions are asked at the end of the survey.
+
+The four groups who took the survey were:
+
+-   Indonesian professionals (not undergraduate students) in 2024, labeled `IndoProf24`
+
+-   Indonesian undergraduates in 2024 after taking a course on Statistical Collaboration, labeled `IndoPost24`
+
+-   Students fromStatistical Collaboration at CU Boulder. Both ugrads and grad students, labeled `StatCollab`
+
+-   Students from Statistical Learning at CU Boulder in Spring 2025, labeled `SLSp25`
+
+#### The Data
+
+The data can be downloaded from: <https://drive.google.com/file/d/179nQH4lO2oUR_9l8sySFKZI7RDPU5rMG/view?usp=sharing>
+
+The questions were asked in groups of five. The first five questions were about how often the respondent had Attitudes 1-5, then how beneficial/detrimental Attitudes 1-5 would be for collaboration, then how often for Attitudes 6-10 and how beneficial/detrimental for Attitudes 6-10, and so on until Attitudes 21-25.
+
+The column name "A1.freq" indicates Frequency of Attitude 1 (How often do you have this attitude?) on a scale from 1 (Never) to 5 (Always). The ratings numbers 1-5 correspond to the ratings "Never" "Rarely" "Sometimes" "Usually" and "Always" (and their Indonesian translations) for the Frequency questions.
+
+The column name "A1.fav" indicates how detrimental/beneficial the respondent thinks that attitude is on a six-point scale: "Extremely Detrimental (1)" "Detrimental (2)" "Somewhat Detrimental (3)", "Somewhat Beneficial (4)", "Beneficial (5)", and "Extremely Beneficial (6)" (and their Indonesian translations).
+
+The 25 attitudes are downloadable here: <https://docs.google.com/document/d/18Hjt4LPC2vkko9Bxm_7NqVgKYLEto8Mz/edit?usp=sharing&ouid=108624562691464780001&rtpof=true&sd=true>
+
+The `Group` variable in the data set has values "StatCollab", "SLSp25", "IndoProf24", and "IndoPost24" corresponding to American students in Statistical Collaboration F24/Sp25, students in Statistical Learning Sp25, Indonesian professionals in 2024, and Indonesian undergraduates in 2024 after taking a course on Statistical Collaboration.
+
+### Instructions for Lab4
+
+#### What individuals need to do (20 pts)
+
+1.  Implement K-means clustering on the data points. Use a sufficient number of starting values (20 is probably fine). Choose $K\in \{2,3,4,5,6\}$. Each individual should choose a different $K$.
+2.  Interpret your results. To what degree do your $K$ clusters correspond to the four groups?
+3.  For the same $K$, cluster the attitudes (cluster the transpose of the $X$ matrix). Interpret your results. Comment on the patterns you see within the clusters of attitudes.
+4.  Use hierarchical clustering to cluster the data points. Each individual should use a different linkage (complete, single, average, or centroid). You must try at least two different distance measures (e.g., Euclidean, Manhattan, correlation). Comment on how many clusters you chose and why? Comment on which distance measure you used for your final clusters and why.
+5.  Plot the "best" dendrogram. Interpret your results. To what degree do your $K$ clusters correspond to the four groups?
+6.  Cluster the attitudes using hierarchical clustering. Use a different linkage (or use more than one and pick the best one). Justify your choice of distance measure.
+7.  Plot the "best" dendrogram. Interpret your results. Compare the patterns you see within the hierarchical clusters of attitudes with the patterns you saw using K-means.
+
+#### What teams need to do
+
+1.  Review and combine individual results. Which methods for clustering the data points seemed to correspond best with the pre-established groups? What $K$ gave you the best results? What linkage? What distance metric?
+2.  Compare the results from Principal Component Analysis (PCA) with the results of clustering the attitudes. Which is more interpretable? What is your interpretation?
+3.  Create your team's final, best clustering of the data points. How well do the clusters correspond to the four groups?
+4.  Create your team's final, best clustering of the attitudes. What patterns do you see within the clusters of attitudes?
+5.  Write a paragraph about individual contributions. Each individual must comment on their contributions to the lab. Only individuals who contribute to the team section will get points for the team section. An example contribution could be: "I synthesized all of the individual results to find that such and such gave the best and most interpretable results. Then I recommended teammate X use this linkage and that distance measure for our team's cluster." Or, "I did the comparison of PCA with our clustering of the attitudes." Or, "I created our team's best clustering of the data points based on teammate Y's synthesis of our individual results." Or, "I took everyone's code and put it together into the qmd file and knitted it." Or, "I made the plot of our team's best clusters."
+
+#### Some intended outcomes from this assignment:
+
+1.  You will individually get practice using K-means and hierarchical clustering
+2.  You will practice using different distance measures and linkages for hierarchical clustering
+3.  You will gain experience interpreting the outputs of clustering algorithms
+4.  You will gain experience collaborating with your teammates on an applied problem
+
+#### Potentially useful code below
+
+```{r include=F}
+suppressPackageStartupMessages(library(tidyverse))
+dat <- read_csv("Attitude.clean.csv")
+dim(dat)
+
+X <- dat[,-1] #Excluding the groups
+dim(X)
+
+# Creating distance measures
+cor_spearman <- cor(t(X), method = "spearman") # Transpose so the rows are the attitude variables
+dist_spearman <- as.dist(1 - cor_spearman)
+
+cor_pearson <- cor(t(X), method = "pearson") 
+dist_pearson <- as.dist(1 - cor_pearson)
+
+# Using Manhattan or Euclidean distance
+dist_manhattan <- dist(X, method = "manhattan") #Manhattan distance counts 
+# the "blocks" between data points as if you were walking along the streets of 
+# Manhattan (i.e., you can't cut diagonally through a city block)
+dist_euclidean <- dist(X, method = "euclidean") #Euclidean distance is the 
+# diagonal "shortest path" between points A and B.
+
+# Using hclust
+hc.complete <- hclust(dist_spearman, method = "complete")
+cutree(hc.complete, k=4)
+
+# Kmeans
+km.out <- kmeans(X, k=4, nstart = 20)
+
+# Doing PCA
+pr.out <- prcomp(X,scale=F) #The attitudes are basically already on the same scale, so scaling the attitudes would confuse things, though A1.freq is on a 5-point scale and A1.fav is on a 6-point scale
+
+# Find means of the four groups
+SL.means <- colMeans(dat[dat[,1]=="SLSp25",2:51])
+StatCollab.means <- colMeans(dat[dat[,1]=="StatCollab",2:51])
+IndoProf.means <- colMeans(dat[dat[,1]=="IndoProf24",2:51])
+IndoPost.means <- colMeans(dat[dat[,1]=="IndoPost24",2:51])
+
+# Then transform the group centroids into the Principal Component space
+C.matrix <- rbind(StatCollab.means,SL.means,IndoProf.means,IndoPost.means)
+
+#Transform C.matrix into scores using the rotation matrix of the first two principal components
+W2 <- pr.out$rotation[,1:2]
+Group.scores <- C.matrix %*% W2
+Group.scores <- mutate(as.data.frame(Group.scores),groups=rownames(Group.scores))
+ggplot(data=Group.scores, aes(x=PC1,y=PC2,col=groups)) +
+  geom_point()
+
+# Comparing found clusters with groups
+# What percentage of each cluster is each group?
+table(km.out$cluster,dat$Group) #can transform this into percentages if necessary
+
+# We can do the same with clusters found from hiearchical clustering
+table(cutree(hc.complete,k=4),dat$Group) #These clusters aren't very good.
+
+```
