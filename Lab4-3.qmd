@@ -176,6 +176,75 @@ plot(pca_t$x[,1:2],pch=19,col=as.factor(trans_cut),main="PC1 and PC2 of Transpos
 ```
 If I compare this to the original labels, then they are clearly not mixed around enough. And If I compare this to the plot with the 4-means cluster labels, then they look relatively similar, except these groups are slightly more mixed about, which is better. 
 
+### Averey Copeland Individual Section
+1)
+```{r}
+library(ISLR2)
+library(tidyverse)
+set.seed(17)
+data <- read.csv("Attitude.clean.csv")
+#View(data)
+
+#k2 <- km.out(data, 2, nstart = 20)
+X <- data[,-1] #Excluding the groups
+dim(X)
+```
+2) Interpret your results. To what degree do your $K$ clusters correspond to the four groups?
+
+```{r}
+
+table(km.out$cluster,data$Group)
+```
+This table shows that it clustered group 1 with primarily IndoPost24, IndoPre25, and IndoProf24. Group 2 had a mix of those groups plus the majority of the classes in the United States. There must be an underlying pattern in which people responded in group 1 that was different from the United States answers.
+3)
+```{r}
+transpose <- t(X)
+km.transpose <- kmeans(transpose, 2, nstart = 20)
+
+#table(km.transpose$cluster,rownames(transpose))
+pca<- prcomp(transpose, scale = TRUE)
+plot(pca$x[,1], pca$x[,2],pch=19,col=km.transpose$cluster,main="PC of Transpose")
+```
+4)
+```{r}
+# Creating distance measures
+cor_spearman <- cor(t(X), method = "spearman") # Transpose so the rows are the attitude variables
+dist_spearman <- as.dist(1 - cor_spearman)
+
+
+# Using hclust
+hc.complete <- hclust(dist_spearman, method = "single")
+plot(hc.complete)
+cut1<-cutree(hc.complete, k=2)
+#plot(cut1)
+
+dist_euclidean <- dist(X, method = "euclidean")
+hc.complete2 <- hclust(dist_euclidean, method = "single")
+#plot(hc.complete2)
+#cutree(hc.complete, k=2)
+cut2<-cutree(hc.complete, k=5)
+#plot(cut2)
+```
+5)
+```{r}
+plot(hc.complete)
+```
+Again, the clusters using the single method are not good. I can't find a place to cut since the clusters all merge gradually, and there is no obvious point of change. I would say this corresponds very little.
+6)
+```{r}
+cor_pearson <- cor(t(X), method = "pearson") 
+dist_pearson <- as.dist(1 - cor_pearson)
+hc.complete2 <- hclust(dist_pearson, method = "average")
+plot(hc.complete2)
+cut <- cutree(hc.complete2, k=3)
+plot(hc.complete2, cut)
+```
+I chose euclidean distance since it just measures how close/far peoples answers are from one another. So that people that choose relatively the same answers overall then they will have a smaller distance from one another. This highlights people that choose 1 then 6 vs someone who chooses 1 then 2 for example. Since they are closer in how they would answer their questions euclidean distance would capture that.
+7)
+```{r}
+plot(hc.complete2)
+```
+The dendrogram shows that most peoples answers were similar since overall, since the majority of the merges happen at around .35. When doing cuts at k=2 and 3 it showed that there is 1 person that answered differently from others in the data set as it consistently grouped a single person in its own cluster with both of these cuts. This is similar to the k means pattern since it also had a majority of observations grouped together with a minority of observations placed in group 1. 
 #### What teams need to do
 
 1.  Review and combine individual results. Which methods for clustering the data points seemed to correspond best with the pre-established groups? What $K$ gave you the best results? What linkage? What distance metric?
