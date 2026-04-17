@@ -58,6 +58,124 @@ The `Group` variable in the data set has values "StatCollab", "SLSp25", "IndoPro
 6.  Cluster the attitudes using hierarchical clustering. Use a different linkage (or use more than one and pick the best one). Justify your choice of distance measure.
 7.  Plot the "best" dendrogram. Interpret your results. Compare the patterns you see within the hierarchical clusters of attitudes with the patterns you saw using K-means.
 
+### Parker Individual Section
+
+```{r,message=FALSE,warning=FALSE}
+data <- read_csv("Attitude.clean.csv")
+
+```
+### Parker Individual Section
+```{r}
+#PCA to Visualize Groups
+
+pca <- prcomp(data[,-1],scale=TRUE)
+
+data$Group <- as.factor(data$Group)
+plot(pca$x[,1:2],pch=19,col=as.factor(data$Group), main="PC1 and PC2")
+legend("topright",legend=levels(data$Group),pch=19,col=1:6)
+```
+### K-Means Clustering
+I scaled the data to have mean zero and standard deviation one because some questions range from 1-5, while other range from 1-6. 
+#### (1)
+```{r}
+set.seed(123)
+
+mat_dat <- as.matrix(data[,-1])
+mat_dat <- scale(mat_dat)
+
+cluster_4 <- kmeans(mat_dat, 4, nstart=20)
+cluster_4$tot.withinss
+```
+```{r}
+#Visualize 4 Clusters Via PCA
+
+plot(pca$x[,1:2],pch=19,col=as.factor(cluster_4$cluster), 
+     main="PC1 and PC2 With 4-Means Cluster Labels")
+```
+#### (2)
+If we compare the plot of the first two principle components with the actual group labels to the plot with the labels obtained from the 4-means clustering, then it is clear that 4 groups do not represent the data that well. The original data seems to be much more mixed compared to the 4-means clustering.
+
+#### (3)
+```{r}
+set.seed(123)
+mat_dat_t <- t(mat_dat)
+mat_dat_t <- scale(mat_dat_t)
+
+trans_cluster <- kmeans(mat_dat_t,4,nstart=20)
+trans_cluster$tot.withinss
+```
+```{r}
+#Plot PC1 and PC2 with labels obtained from 4-means clustering of 
+#transposed x matrix
+pca_t <- prcomp(mat_dat_t,scale=TRUE)
+
+col_groups <- as.factor(colnames(data[,-1]))
+
+plot(pca_t$x[,1:2],pch=19,col=col_groups,main="PC1 and PC2 of Transpose")
+legend("topright",legend=levels(col_groups),pch=19,col=1:6)
+```
+```{r}
+#PC1 and PC2 with 4-means cluster labels 
+plot(pca_t$x[,1:2],pch=19,col=trans_cluster$cluster,main="PC1 and PC2 of Transpose: 4-Means Labels")
+```
+Again, the 4-means cluster does not match the data super well. There aren't really any distinct groups if we look at the actual labels. But we are trying to group all of the different attitudes into four groups. Compared to the non-transposed data, these four groups from the k-means algorithm are more distinct. 
+
+### Hierarchical Clustering 
+####(4)
+
+```{r}
+#Hierarchical Clustering with Euclidean Measure
+
+hc_eucl <- hclust(dist(mat_dat), method="average")
+
+plot(hc_eucl, main="Euclidean Measure and Average Linkange",ylab="",sub="",,xlab="",
+     cex=0.9)
+```
+#### (5)
+```{r}
+dd <- as.dist(1-cor(t(mat_dat)))
+
+x <- 1:140
+y<- rep(0.98,140)
+hc_corr <- hclust(dd,method="average")
+plot(hclust(dd,method="average"),main="Correlation Measure and Average Linkage",
+     xlab="",ylab="",sub="")
+lines(x,y,lty="dashed",col="red",lwd=2)
+```
+I think it makes the most sense to use the correlation distance measure because it can capture the similarity of attitude patterns versus just absolute differences. The correlation measure can capture patterns of individuals answering in similar ways, but not exactly the same: people who tend to give high answers and people who tend to give small answers. After observing the tree, I want to cut the tree at 0.98 to obtain 4 groups. I chose 0.98 because the vertical distance of the connecting nodes seem to yield farily distinct groups.
+```{r}
+#Cut Tree
+corr_cut <- cutree(hc_corr,4)
+
+#Plot PC1 and PC2 with Corr_cut labels
+plot(pca$x[,1:2],pch=19,col=as.factor(corr_cut), 
+     main="PC1 and PC2: Hierarchical,Correlation Measure Labels")
+```
+This seems to have performed slightly better than the 4-means cluster because it captures more that the points are more mixed. The two smallest groups are the least distinct. I think the correlation distance measure with the hierarchichal clustering captured a relationship in the data that the 4-means clustering didn't.
+
+##### (6)
+```{r}
+#Hierarchical Clustering on transpose with Complete linkage, Euclidean Distance
+ddt <- as.dist(1-cor(t(mat_dat_t)))
+
+x <- 1:50
+y <- rep(1.10,50)
+hc_trans_corr <- hclust(ddt,method="complete")
+plot(hc_trans_corr,xlab="",ylab="",main="Attitudes and Complete Linkage",sub="")
+lines(x,y,col="red",lty="dashed",lwd=2)
+```
+When we transpose the data we are trying to group together the attitudes. So I also think that correlation distance will be an appropriate measure to capture similarity in attitudes among all respondents. I think that cutting at 1.1 makes sense since the vertical distances seem to be large enough to show distinct groups. This yields 5 groups.
+
+#### (7)
+
+```{r}
+#Cut tree and plot groups on first two principle components
+trans_cut <- cutree(hc_trans_corr,5)
+
+plot(pca_t$x[,1:2],pch=19,col=as.factor(trans_cut),main="PC1 and PC2 of Transpose: HC Groups with Correlation Measure")
+```
+If I compare this to the original labels, then they are clearly not mixed around enough. And If I compare this to the plot with the 4-means cluster labels, then they look relatively similar, except these groups are slightly more mixed about, which is better. 
+
 #### What teams need to do
 
 1.  Review and combine individual results. Which methods for clustering the data points seemed to correspond best with the pre-established groups? What $K$ gave you the best results? What linkage? What distance metric?
