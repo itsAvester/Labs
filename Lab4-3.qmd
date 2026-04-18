@@ -245,6 +245,97 @@ I chose euclidean distance since it just measures how close/far peoples answers 
 plot(hc.complete2)
 ```
 The dendrogram shows that most peoples answers were similar since overall, since the majority of the merges happen at around .35. When doing cuts at k=2 and 3 it showed that there is 1 person that answered differently from others in the data set as it consistently grouped a single person in its own cluster with both of these cuts. This is similar to the k means pattern since it also had a majority of observations grouped together with a minority of observations placed in group 1. 
+
+
+## Corva Individual Part
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+
+att.data <- read.csv("Attitude.clean.csv")
+
+att.data.numeric <- att.data %>%
+  select(-Group)
+
+attitudes.labels <- colnames(att.data.numeric)
+groups.labels <- att.data$Group
+```
+
+
+K-Means for the data points:
+
+```{r}
+set.seed(123)
+km.six <- kmeans(att.data.numeric, 6, nstart=20)
+table(km.six$cluster, groups.labels)
+```
+
+My six clusters don't do the best job of corresponding to the *six* groups. It appears to pick up on bigger trends, like cluster 3 being mostly SLS/ Stat Collab or Cluster 5 being some sort of Indonesian group. 
+
+
+K-Means for Attitudes: 
+
+```{r}
+set.seed(123)
+km.six.att <- kmeans(t(att.data.numeric), 6, nstart=20)
+table(km.six.att$cluster, attitudes.labels)
+
+km.six.att$cluster
+attitudes.labels
+# table(km.six.att$cluster, attitudes.labels)
+```
+
+Similar attitudes seem to be in the same cluster, for example, attitudes 7 and 12: "Usually, domain experts do want to learn new statistics; they just want to take the easiest path/ Domain experts only need to know the statistical analysis results; they don't need to understand the statistical methods used". Based on the responses about attitude frequency/ benefits, clustering grouped similar attitudes without even knowing what the specific attitudes were. In addition, it appears that frequency and how beneficial people find their attitudes seem to be in the same cluster for most attitudes. 
+
+
+Hierarchical clustering for the data points:
+
+```{r}
+#scale the variables
+att.data.numeric.2 <- scale(att.data.numeric)
+km.six.att.comp <- hclust(dist(att.data.numeric.2), method="complete")
+km.six.att.man <- hclust(dist(att.data.numeric.2, method="manhattan"), method="complete")
+
+#plot(km.six.att.comp, main="complete linkage, euclidean distance")
+#plot(km.six.att.man, main="complete linkage, manhattan distance")
+```
+
+For my final clusters, I used the Euclidean distance because separation between the groups in the plotted dendrogram appeared to be more distinct. Manhattan distance didn't seem appropriate because the data points weren't laid out in a grid-like fashion. If I didn't know anything about the data, I would choose four clusters because cutting the tree for 6 or 5 clusters results in only one observation being in group 6/5. Cutting the tree at around height 15 cuts at a place with long vertical lines, and results in four distinct groups. However, I'll chose 6 clusters because I know there are six groups in the data.
+
+```{r}
+c.best.hier <- cutree(km.six.att.comp, 6)
+plot(km.six.att.comp, main="complete linkage, euclidean distance")
+c.best.hier
+
+table(c.best.hier, groups.labels)
+```
+
+The 6 clusters don't very well correspond to the six groups. Just like the K-means clustering, the clustering seemed to pick up on larger groups, for example, putting almost all the observations for SLSp25 and SLSp26 in the same group. However, the clustering didn't pick up on smaller distinctions between the data, for example, between the Stat Learning Spring 2025 vs 2026. It's possible that the data might just not be different enough between these smaller groups.
+
+Clustering attitudes with hierarchical clustering: 
+
+```{r}
+att.data.numeric.t <- scale(t(att.data.numeric))
+km.six.att.compt <- hclust(dist(t(att.data.numeric.2)), method="average")
+km.six.att.mant <- hclust(dist(t(att.data.numeric.2), method="manhattan"), method="complete")
+```
+
+For my final clusters, I used the Euclidean distance because separation between the groups in the plotted dendrogram appeared to be more distinct. Manhattan distance didn't seem appropriate because the data points weren't laid out in a grid-like fashion. I'll chose 25 clusters because I know there are 25 attitudes in the data.
+
+It appears that the hierarchical clusters of attitudes do a good job of separating the attitudes within clusters: it appears that frequency and how beneficial people find their attitudes seem to be in the same cluster for most attitudes. It appears that the hierarchical clustering placed attitudes 6, 25, and 23 in the "wrong" clusters. The hierarchical clustering performed much better than K-means clustering, being able to pick out individual attitudes instead of finding clusters of attitudes that were somewhat similar.
+
+```{r}
+c.best.hiert <- cutree(km.six.att.compt, 25)
+plot(km.six.att.compt, main="average linkage, euclidean distance")
+#c.best.hiert
+
+#table(c.best.hiert, attitudes.labels)
+```
+
+It appears that the hierarchical clusters of attitudes do a good job of separating the attitudes within clusters: it appears that frequency and how beneficial people find their attitudes seem to be in the same cluster for most attitudes. It appears that the hierarchical clustering placed attitudes 6, 25, and 23 in the "wrong" clusters. The hierarchical clustering performed much better than K-means clustering, being able to pick out individual attitudes instead of finding clusters of attitudes that were somewhat similar.
+
+
 #### What teams need to do
 
 1.  Review and combine individual results. Which methods for clustering the data points seemed to correspond best with the pre-established groups? What $K$ gave you the best results? What linkage? What distance metric?
