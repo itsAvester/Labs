@@ -107,7 +107,7 @@ trans_cluster$tot.withinss
 ```{r}
 #Plot PC1 and PC2 with labels obtained from 4-means clustering of 
 #transposed x matrix
-pca_t <- prcomp(mat_dat_t,scale=TRUE)
+pca_t <- prcomp(t(data[,-1]),scale=TRUE)
 
 col_groups <- as.factor(colnames(data[,-1]))
 
@@ -156,25 +156,34 @@ This seems to have performed slightly better than the 4-means cluster because it
 ##### (6)
 ```{r}
 #Hierarchical Clustering on transpose with Complete linkage, Euclidean Distance
-ddt <- as.dist(1-cor(t(mat_dat_t)))
+ddt <- as.dist(1-cor(t(data[,-1])))
 
-x <- 1:50
-y <- rep(1.10,50)
+x <- 1:180
+y <- rep(.85,180)
 hc_trans_corr <- hclust(ddt,method="complete")
 plot(hc_trans_corr,xlab="",ylab="",main="Attitudes and Complete Linkage",sub="")
 lines(x,y,col="red",lty="dashed",lwd=2)
 ```
-When we transpose the data we are trying to group together the attitudes. So I also think that correlation distance will be an appropriate measure to capture similarity in attitudes among all respondents. I think that cutting at 1.1 makes sense since the vertical distances seem to be large enough to show distinct groups. This yields 5 groups.
+When we transpose the data we are trying to group together the attitudes. So I also think that correlation distance will be an appropriate measure to capture similarity in attitudes among all respondents. I think that cutting at 0.85 makes sense since the vertical distances seem to be large enough to show distinct groups. This yields 6 groups.
 
 #### (7)
 
 ```{r}
 #Cut tree and plot groups on first two principle components
-trans_cut <- cutree(hc_trans_corr,5)
+trans_cut <- cutree(hc_trans_corr,6)
 
 plot(pca_t$x[,1:2],pch=19,col=as.factor(trans_cut),main="PC1 and PC2 of Transpose: HC Groups with Correlation Measure")
 ```
 If I compare this to the original labels, then they are clearly not mixed around enough. And If I compare this to the plot with the 4-means cluster labels, then they look relatively similar, except these groups are slightly more mixed about, which is better. 
+
+
+```{r}
+hc_corr2 <- hclust(dd,method="complete")
+corr_cut2 <- cutree(hc_corr2,6)
+
+plot(pca$x[,1:2],pch=19,col=as.factor(corr_cut2), 
+     main="PC1 and PC2: Hierarchical,Correlation Measure Labels and Complete Link")
+``` 
 
 ### Averey Copeland Individual Section
 1)
