@@ -244,7 +244,7 @@ I chose euclidean distance since it just measures how close/far peoples answers 
 ```{r}
 plot(hc.complete2)
 ```
-The dendrogram shows that most peoples answers were similar since overall, since the majority of the merges happen at around .35. When doing cuts at k=2 and 3 it showed that there is 1 person that answered differently from others in the data set as it consistently grouped a single person in its own cluster with both of these cuts. This is similar to the k means pattern since it also had a majority of observations grouped together with a minority of observations placed in group 1. 
+The dendrogram shows that most peoples answers were similar, since overall, the majority of the merges happen at around .35. When doing cuts at k=2 and 3 it showed that there is 1 person that answered differently from others in the data set as it consistently grouped a single person in its own cluster with both of these cuts. This is similar to the k means pattern since it also had a majority of observations grouped together with a minority of observations placed in group 1. 
 
 
 ## Corva Individual Part
