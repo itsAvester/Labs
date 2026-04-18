@@ -355,6 +355,21 @@ It appears that the hierarchical clusters of attitudes do a good job of separati
 1.  Review and combine individual results. Which methods for clustering the data points seemed to correspond best with the pre-established groups? What $K$ gave you the best results? What linkage? What distance metric?
 2.  Compare the results from Principal Component Analysis (PCA) with the results of clustering the attitudes. Which is more interpretable? What is your interpretation?
 3.  Create your team's final, best clustering of the data points. How well do the clusters correspond to the four groups?
+
+```{r}
+#using average linkage
+#using correlation
+dist_corr <- as.dist(1 - cor(t(att.data.numeric.2)))
+team_hier <- hclust(dist_corr, method="average")
+team_cut <- cutree(team_hier, k = 6)
+#plotting it
+pcat <- prcomp(att.data.numeric.2, scale. = TRUE)
+plot(pcat$x[,1:2],
+     pch = 19,
+     col = as.factor(team_cut),
+     main = "average linkage, correlation")
+```
+It appears that the best clustering of the data points was with average linkage and correlation distance meausre. The clusters correspond mostly well to the six groups, with most of the groups in the PCA plot being distinct from each other.
 4.  Create your team's final, best clustering of the attitudes. What patterns do you see within the clusters of attitudes?
 5.  Write a paragraph about individual contributions. Each individual must comment on their contributions to the lab. Only individuals who contribute to the team section will get points for the team section. An example contribution could be: "I synthesized all of the individual results to find that such and such gave the best and most interpretable results. Then I recommended teammate X use this linkage and that distance measure for our team's cluster." Or, "I did the comparison of PCA with our clustering of the attitudes." Or, "I created our team's best clustering of the data points based on teammate Y's synthesis of our individual results." Or, "I took everyone's code and put it together into the qmd file and knitted it." Or, "I made the plot of our team's best clusters."
 
