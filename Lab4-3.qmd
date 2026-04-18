@@ -384,7 +384,18 @@ plot(pcat$x[,1:2],
 ```
 It appears that the best clustering of the data points was with average linkage and correlation distance meausre. The clusters correspond mostly well to the six groups, with most of the groups in the PCA plot being distinct from each other.
 4.  Create your team's final, best clustering of the attitudes. What patterns do you see within the clusters of attitudes?
-5.  Write a paragraph about individual contributions. Each individual must comment on their contributions to the lab. Only individuals who contribute to the team section will get points for the team section. An example contribution could be: "I synthesized all of the individual results to find that such and such gave the best and most interpretable results. Then I recommended teammate X use this linkage and that distance measure for our team's cluster." Or, "I did the comparison of PCA with our clustering of the attitudes." Or, "I created our team's best clustering of the data points based on teammate Y's synthesis of our individual results." Or, "I took everyone's code and put it together into the qmd file and knitted it." Or, "I made the plot of our team's best clusters."
+
+```{r}
+team_hier_trans <- hclust(ddt,method="average")
+team_cut_trans <- cutree(team_hier_trans,10)
+
+plot(pca_t$x[,1:2],pch=19,col=as.factor(team_cut_trans),main="average linkage, correlation")
+```
+It appears that the best clustering of the attitudes was with average linkage and correlation distance measure. There are well-separated clusters that clearly separate attitude groups even with higher k (k = 10 here). There are a lot of points in group 1 (black) and group 4 (blue). Here, the attitudes seem similar and are grouped together, for example, the attitudes in group 1 (1,3,4, etc.) all seem to be very collaborative. 
+
+5.  Write a paragraph about individual contributions. 
+
+Corva did the team data & attitude clustering. Parker reviewed and combined the results. Averey did the comparison with PCA. 
 
 #### Some intended outcomes from this assignment:
 
