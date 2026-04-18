@@ -387,7 +387,7 @@ It appears that the best clustering of the data points was with average linkage 
 
 ```{r}
 team_hier_trans <- hclust(ddt,method="average")
-team_cut_trans <- cutree(team_hier_trans,10)
+team_cut_trans <- cutree(team_hier_trans,8)
 
 plot(pca_t$x[,1:2],pch=19,col=as.factor(team_cut_trans),main="average linkage, correlation")
 ```
