@@ -297,6 +297,13 @@ att.data.numeric.2 <- scale(att.data.numeric)
 km.six.att.comp <- hclust(dist(att.data.numeric.2), method="complete")
 km.six.att.man <- hclust(dist(att.data.numeric.2, method="manhattan"), method="complete")
 
+#plotting it
+pcac <- prcomp(att.data.numeric.2, scale. = TRUE)
+plot(pcac$x[,1:2],
+     pch = 19,
+     col = as.factor(c.best.hier),
+     main = "PC1 and PC2: Hierarchical (Complete Linkage, Euclidean Distance) Clusters")
+
 #plot(km.six.att.comp, main="complete linkage, euclidean distance")
 #plot(km.six.att.man, main="complete linkage, manhattan distance")
 ```
