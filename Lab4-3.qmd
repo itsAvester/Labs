@@ -354,6 +354,9 @@ It appears that the hierarchical clusters of attitudes do a good job of separati
 
 1.  Review and combine individual results. Which methods for clustering the data points seemed to correspond best with the pre-established groups? What $K$ gave you the best results? What linkage? What distance metric?
 2.  Compare the results from Principal Component Analysis (PCA) with the results of clustering the attitudes. Which is more interpretable? What is your interpretation?
+
+The clustering of the attitudes seems more interpratable since it directly shows the clusters of how close people's attitudes were to each other. This shows patterns within the data that can be more easily interpreted. My interpretation of the clustering is that most people have similar opinions in their answers, and those that have different opinions than the majority also answered similarly within their own clusters for the most part.
+
 3.  Create your team's final, best clustering of the data points. How well do the clusters correspond to the four groups?
 
 ```{r}
