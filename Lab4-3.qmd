@@ -334,10 +334,17 @@ It appears that the hierarchical clusters of attitudes do a good job of separati
 
 ```{r}
 c.best.hiert <- cutree(km.six.att.compt, 25)
-plot(km.six.att.compt, main="average linkage, euclidean distance")
+#plot(km.six.att.compt, main="average linkage, euclidean distance")
 #c.best.hiert
 
 #table(c.best.hiert, attitudes.labels)
+
+#plotting it
+pcat <- prcomp(att.data.numeric.t, scale. = FALSE)
+plot(pcat$x[,1:2],
+     pch = 19,
+     col = as.factor(c.best.hier),
+     main = "Hierarchical Complete Linkage, Euclidean Distance for Transpose")
 ```
 
 It appears that the hierarchical clusters of attitudes do a good job of separating the attitudes within clusters: it appears that frequency and how beneficial people find their attitudes seem to be in the same cluster for most attitudes. It appears that the hierarchical clustering placed attitudes 6, 25, and 23 in the "wrong" clusters. The hierarchical clustering performed much better than K-means clustering, being able to pick out individual attitudes instead of finding clusters of attitudes that were somewhat similar.
