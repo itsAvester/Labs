@@ -1,0 +1,46 @@
+---
+title: "Final Project"
+author: "STAT 4610/5610 Spring 2026"
+format: pdf
+editor: visual
+date: 2026-03-30
+---
+
+## Final Project: Applying Various Methods to Answer Questions of Interest
+
+**Due: 11:59PM Friday, April 24 on Canvas as a knitted pdf file of your team's Quarto document**
+
+1.  You will individually fit **at least three statistical learning models** to answer your individual question of interest based on your team's chosen data set. You will individually explain what the relevant problem context is (Q1), what methods you used and their results (Q2), how those results answer the question of interest (Q3), and what implications (recommendations, next step actions, etc.) the answers have (Q3). In addition, you will comment on some ethical aspect of the problem.
+2.  **Each individual must use at least one unique method**, i.e., not a method used by any of your teammates. For example, if team member 1 fit a cubic spline, BART, and a feedforward neural network to answer their individual research question and member 2 used a cubic spline, BART, and random forest, and member 3 used BART, natural spline, and lasso, then member 4 could not use a feedforward NN or a random forest or both natural spline and lasso.
+3.  Teams will propose and answer a team research question that should incorporate the individual contributions. In other words, teams will combine findings from the individual components when answering their team question. Each individual must contribute to the team part and state what their contribution was. No stated contribution by individuals means no team points for that individual.
+4.  Team answers should follow the Q1-Q2-Q3 workflow, including a reflection about an ethical principal used or some other ethical aspect of the team solution. Teams must also produce a plot that helps to tell the narrative of the data. (Individuals should also include plots in their individual parts, but it's not strictly required.)
+
+#### What teams need to do first (Final Project Proposal)
+
+1.  Choose a dataset that has enough interesting predictor X variables so that you can have four individual sub-research questions and one overall team research question. You are encouraged to gain practice doing unsupervised learning (PCA, K-means or hierarchical clustering) if that makes sense for your data set and your research questions.
+2.  Brainstorm various research questions. Each individual needs their own sub-research question to answer. Think about how the answers to the sub-research questions could inform the answer to the overall team research question.
+
+#### What individuals need to do
+
+1.  Given your team's data set and your sub-research question, fit at least three statistical learning models. For each model fit, you should also play around with different tuning parameters, likely using CV.
+2.  Explain Q1, Q2, and Q3.
+3.  Comment on any ethical implications of this work.
+4.  Highly recommended: Create visualizations of your models or just of the best model.
+
+#### What teams need to do
+
+1.  Answer a team research question.
+2.  Explain Q1, Q2, and Q3.
+3.  Comment on any ethical implications of this work.
+4.  Create at least one visualization that helps tell the overall narrative of the data.
+
+#### Individual contributions
+
+Each individual must comment on their contributions to the team research question. Only individuals who contribute to the team section (and state their contributions) will get points for the team section.
+
+#### **Some intended outcomes from this final project:**
+
+-   You will individually get practice fitting statistical learning models
+-   You will consolidate your learning of statistical learning methods to answer research questions of interest to you
+-   You will gain experience working on a data science project as a team
+-   You can post your final project on a personal portfolio (like a GitHub page) to show an example of your work to potential employers
