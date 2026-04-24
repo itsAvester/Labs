@@ -30,11 +30,6 @@ Corva's sub-research question: Can driver characteristics like age, sex, race, p
 3.  Comment on any ethical implications of this work.
 4.  Highly recommended: Create visualizations of your models or just of the best model.
 
-#### What teams need to do
-
-1.  Answer a team research question.
-2.  Explain Q1, Q2, and Q3.
-
 ## Corva's individual part
 
 #### K-Nearest Neighbors
@@ -178,7 +173,10 @@ All three of the models, even after tuning, just predicted the most common outco
 
 Even though these models did not find any predictive power of the three driver characteristics, it is important not to assume that age, race, and sex don't have any affect on traffic stop outcomes. Traffic stop outcomes are highly contextual and driver characteristics may still have influence on them when considering more predictors.
 
+#### What teams need to do
 
+1.  Answer a team research question.
+2.  Explain Q1, Q2, and Q3.
 
 
 Q1: What factors influence outcomes in traffic stops, given police traffic stop data in Hartford, CT from October 2013-September 2016? Governments and police departments are interested in this question in order to more fairly enforce outcomes of traffic stops. More specifically, are outcomes of traffic stops more influenced by the drivers, or the officers conducting the traffic stops? Are specific situations of traffic stops, for example, stops that are late at night on certain days, more likely to have different outcomes? Data was obtained from the Stanford Open Policing Project, which collects and standardizes records of traffic stops across the United States.
