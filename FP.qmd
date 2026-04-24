@@ -22,7 +22,7 @@ date: 2026-03-30
 
 Overall research question: What factors influence outcomes in traffic stops?
 Corva's sub-research question: Can driver characteristics like age, sex, race, predict whether the driver is given a warning, citation, or arrested? I will use K-Nearest Neighbors, QDA, BART
-
+Parker's sub-reasearch question(s): Are some districts more punitive, or do they just deal with more serious crimes? How much predictive power do the district, time, and reason for stop variables have on the outcome of a traffic stop, not including demographics?
 #### What individuals need to do
 
 1.  Given your team's data set and your sub-research question, fit at least three statistical learning models. For each model fit, you should also play around with different tuning parameters, likely using CV.
