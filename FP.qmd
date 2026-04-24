@@ -35,6 +35,152 @@ Corva's sub-research question: Can driver characteristics like age, sex, race, p
 1.  Answer a team research question.
 2.  Explain Q1, Q2, and Q3.
 
+## Corva's individual part
+
+#### K-Nearest Neighbors
+
+K-Nearest Neighbors is selected because n is very large (\~14,000), and p is relatively small. No shape about the decision boundary is assumed.
+
+
+```{r}
+#K-Nearest Neighbors
+#will try a variety of K
+
+data2 <- data %>%
+  filter(!is.na(subject_age), !is.na(subject_race)) %>%
+  select(outcome, subject_age, subject_race, subject_sex)
+
+knn.Y <- data2$outcome
+knn.X <- model.matrix(~ subject_age + subject_race + subject_sex -1, data = data2)
+
+#get rows
+set.seed(123)
+crows <- sample(nrow(knn.X), size = floor(0.8 * nrow(knn.X)))
+
+ctrain.X <- knn.X[crows, ]
+ctest.X  <- knn.X[-crows, ]
+
+ctrain.X <- scale(ctrain.X)
+ctest.X  <- scale(ctest.X, 
+                  center = attr(ctrain.X, "scaled:center"),
+                  scale  = attr(ctrain.X, "scaled:scale"))
+
+ctrain.Y <- knn.Y[crows]
+ctest.Y  <- knn.Y[-crows]
+
+ctrain <- data2[crows, ]
+ctest  <- data2[-crows, ]
+
+#adapting code from KNN.R in canvas
+
+error.rate.cv.knn <- rep(NA, 15)
+for (k in 1:15) {
+  out <- knn.cv(
+    train = ctrain.X,
+    cl = ctrain.Y,
+    k= k
+  )
+  
+  error.rate.cv.knn[k] <- mean(out != ctrain.Y)
+}
+
+plot(error.rate.cv.knn, type = "b")
+error.rate.cv.knn
+```
+
+Using cross-validation to pick the best k for KNN, it appears by inspection of the testing error rate that the best k is 10.
+
+```{r}
+# fitting the final model and finding error rate
+
+final.knn.c <- knn(ctrain.X, ctest.X, ctrain.Y, k=10)
+
+
+# error rate
+error.knn.c <- mean(final.knn.c != ctest.Y)
+
+table(Predicted = final.knn.c, Actual = ctest.Y)
+```
+
+Using K-Nearest Neighbors, with k selected with cross-validation, error rate was around 23% in predicting whether a driver was given a warning, citation, or arrested using just driver sex, age, and race. However, even after scaling variables and adjusting k, the model defaults to the null and only predicts the outcome of citation. It appears that the three predictors of driver characteristics, age, race, and sex, don't provide much predictive power for outcome.
+
+
+#### Multinomial Logistic Regression
+
+The next model, multinomial logistic regression, is selected because it might be able to pick out patterns relating between driver characteristics and outcome across all of the data points, instead of just looking at potentially noisy neighbors.
+
+```{r}
+set.seed(123)
+
+multi.log.c <- cv.glmnet(x = ctrain.X, y = ctrain.Y, family = "multinomial", type.measure = "class")
+multi.lambda <- multi.log.c$lambda.min
+
+multi.log.pred <- predict(multi.log.c, ctest.X, multi.lambda, type="class")
+table(Predicted = multi.log.pred, Actual = ctest.Y)
+
+mean(multi.log.pred == ctest.Y)
+```
+
+In fitting the logistic regression, cross-validation was performed for $\lambda$, which controls how closely the model is allowed to follow the training data. It appears that the model ends up just predicting the outcome citation, which is the most frequent class, for all data points. Again, it seems that the three predictors of driver characteristics, age, race, and sex, don't provide much predictive power for outcome.
+
+#### Random Forests
+
+Random forests are selected for the next model. Random forests decorrelate trees by using a random subset of predictors. As opposed to K-Nearest-Neighbors or logistic regression, random forests give more consistent predictions by averaging many trees.  These earlier models defaulted to the null model, and random forests are able to explore more complex relationships that may have been missed. 
+
+```{r}
+set.seed(123)
+data2$outcome <- as.factor(data2$outcome)
+
+
+#cross validate for node size and size of number of predictors considered
+
+mtry.valuesF <- 1:3
+oob.errors <- numeric(length(mtry.valuesF))
+
+for (j in seq_along(mtry.valuesF)) {
+  rf <- randomForest(
+    outcome ~ subject_age + subject_race + subject_sex,
+    data = data2,
+    mtry = mtry.valuesF[j],
+    ntree = 200
+  )
+
+  oob.errors[j] <- tail(rf$err.rate[, "OOB"], 1)
+}
+
+rforestbestvals <- which.min(oob.errors) 
+rforestbestvals
+
+#fit tuned model and predict and find validated test error
+
+
+randomFTree.tuned <- randomForest(outcome~subject_age+subject_race+subject_sex,
+                                  data=ctrain,
+                                  mtry=1,
+                                  ntree=200,
+                                  importance=TRUE)
+
+randomFTree.pred <- predict(randomFTree.tuned,newdata=ctest)
+table(Predicted = randomFTree.pred, Actual = ctest$outcome)
+```
+
+In fitting the random forests model, the parameter $mtry$ was tuned, which controls how much data the model looks at in each split. Along with K-Nearest Neighbors and Logistic Regression, the model ends up just predicting the outcome citation, which is the most frequent class, for all data points. It seems that the three predictors of driver characteristics, age, race, and sex, don't provide much predictive power for outcome.
+
+2.  Explain Q1, Q2, and Q3.
+
+How well do driver characteristics like age, sex, and race, inform outcome of traffic stops? This sub-question informs the main research question by analyzing how driver characteristics, and nothing else about the traffic stop, impact whether the driver is given a warning, citation, or is arrested.
+
+Three statistical learning models were applied to data about the driver age, race, and sex. K-Nearest Neighbors was selected because no shape about any decision boundary was assumed. Next, multinomial logistic regression was fitted because it looks at all of the data points, not just neighbors. Finally, a random forests model was fitted to the data because it is able to explore more complex relationships between the three predictors, and because it produces more reliable results by averaging trees. However, all three models, even after tuning parameters, defaulted to just predicting the most common outcome, citation. 
+
+All three of the models, even after tuning, just predicted the most common outcome and were not able to find any meaningful relationships between the predictors and the outcome. It appears that, only using driver characteristics of age, race, and sex, that outcome cannot meaningfully be predicted. Further analysis is needed - these predictors may be significant in the context of other predictors, for example, district or time of day, however, do not have predictive power by themselves. 
+
+3.  Comment on any ethical implications of this work.
+
+Even though these models did not find any predictive power of the three driver characteristics, it is important not to assume that age, race, and sex don't have any affect on traffic stop outcomes. Traffic stop outcomes are highly contextual and driver characteristics may still have influence on them when considering more predictors.
+
+
+
+
 Q1: What factors influence outcomes in traffic stops, given police traffic stop data in Hartford, CT from October 2013-September 2016? Governments and police departments are interested in this question in order to more fairly enforce outcomes of traffic stops. More specifically, are outcomes of traffic stops more influenced by the drivers, or the officers conducting the traffic stops? Are specific situations of traffic stops, for example, stops that are late at night on certain days, more likely to have different outcomes? Data was obtained from the Stanford Open Policing Project, which collects and standardizes records of traffic stops across the United States.
 
 3.  Comment on any ethical implications of this work.
