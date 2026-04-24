@@ -173,6 +173,90 @@ All three of the models, even after tuning, just predicted the most common outco
 
 Even though these models did not find any predictive power of the three driver characteristics, it is important not to assume that age, race, and sex don't have any affect on traffic stop outcomes. Traffic stop outcomes are highly contextual and driver characteristics may still have influence on them when considering more predictors.
 
+###Averey Individual Section
+1) Given your team's data set and your sub-research question, fit at least three statistical learning models. For each model fit, you should also play around with different tuning parameters, likely using CV.
+#Baseline 
+```{r}
+library(ISLR2)
+library(tidyverse)
+set.seed(17)
+data <- read.csv("Hartford.csv")
+#View(data)
+#BASELINE (White is the most common race pulled over. Always predict white)
+pred <- rep("white", nrow(testing))
+mean(pred == testing$subject_race)
+#.396
+```
+```{r}
+set.seed(100)
+library(ranger)
+data <- data %>%
+  na.omit()
+rows <- sample(x=nrow(data),size=floor(0.75*nrow(data)),replace=FALSE)
+
+training <- data[rows,]
+testing <- data[-rows,]
+training$subject_race <- as.factor(training$subject_race)
+testing$subject_race  <- as.factor(testing$subject_race)
+
+## Random forest
+rf <- ranger(subject_race~location+district+subject_age+subject_sex+arrest_made+outcome+reason_for_stop ,data=training)
+
+pred.rf <- predict(rf,data=testing)
+pred.class <- pred.rf$predictions
+table(Predicted = pred.class, Actual = testing$subject_race)
+mean(pred.class == testing$subject_race)
+```
+##SVC
+{r}
+library(e1071)
+set.seed(117)
+data <- data %>%
+  na.omit()
+training <- data[rows,]
+testing <- data[-rows,]
+data$subject_race <- as.factor(data$subject_race)
+data$location <- as.factor(data$location)
+data$district <- as.factor(data$district)
+data$subject_sex <- as.factor(data$subject_sex)
+data$arrest_made <- as.factor(data$arrest_made)
+data$outcome <- as.factor(data$outcome)
+data$reason_for_stop <- as.factor(data$reason_for_stop)
+rows <- sample(x=nrow(data),size=floor(0.75*nrow(data)),replace=FALSE)
+training <- data[rows,]
+testing <- data[-rows,]
+
+#Tried radial and linear
+tune.out <- tune(svm,subject_race~location+district+subject_age+subject_sex+arrest_made+outcome+reason_for_stop,data=training,kernel="linear",scale=FALSE,
+  ranges=list(cost=c(0.01,.1,1,10,length.out=10)))
+model <- tune.out$best.model
+pred <- predict(model, newdata=testing)
+mean(pred == testing$subject_race)
+```
+##Discriminant Analysis
+```{r}
+library(MASS)
+lda <- lda(subject_race~district+subject_age+subject_sex+arrest_made+outcome+reason_for_stop,data=training)
+pred <- predict(lda, newdata=testing)
+class <- pred$class
+table(Predicted = class, Actual = testing$subject_race)
+mean(class == testing$subject_race)
+```
+2)
+Explain Q1, Q2, and Q3.
+
+I aimed to find if a model could predict what race was pulled over, given the predictors district, subject age, subject sex, if an arrest was made, outcome, and reason for stop. I used a SVC model with the goal to see if race was associated with traffic stops. Though this model doesn't prove or show bias in whether a race is pulled over, it can show an association with certain predictors. To answer this, I tried a random forest model, discriminant analysis, and the SVC model. The SVC model had the highest accuracy of .5625. The SVC model was tuned via cross validation, and the best model out of that was the final one used in the prediction. Though and accuracy of .5625 is better than randomly guessing by a good margin, showing that the predictors have some association with race. I also wanted to get a baseline by always guessing the most common race in the datatset to see how much the model beat it by. The baseline had an accuracy of roughly .39 demonstrating further that there must be some association between race and the predictors.
+3)
+Comment on any ethical implications of this work.
+
+A big ethical implication is that this model and the outcome of its prediction do not directly show that there is bias in police pulling over certain races for certain violations, and if someone used this model and interprated it that way, it could lead to certain police officers to be wrongfully fired. It could also lead to a decrease in support or funding for the police department.  It could also be biased given a biased data set, and could be interpreted in an area where these patterns do not exist or are more frequent. Leading to inaccuracy of interpretation overall. 
+4) Visualization
+```{r}
+#comparison of model accuracy
+dataframe <- data.frame(Models=c("Svm","Random Forest", "Discriminant Analysis", "Baseline"), Accuracy=c(.5625,.5162,.5474,.3969))
+ggplot(dataframe, aes(x=Models, y=Accuracy))+geom_col()+ylim(0,1)
+```
+
 #### What teams need to do
 
 1.  Answer a team research question.
