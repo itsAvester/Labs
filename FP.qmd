@@ -456,6 +456,52 @@ After statistical model fitting, it was found that driver characteristics alone 
 3.  Comment on any ethical implications of this work.
 4.  Create at least one visualization that helps tell the overall narrative of the data.
 
+```{r}
+library(ggplot2)
+library(dplyr)
+install.packages("ggalluvial")
+library(ggalluvial)
+
+data2$outcome <- ifelse(data2$outcome == 1, "Arrest/Citation", "Warning")
+data2$outcome <- as.factor(data2$outcome)
+```
+
+```{r}
+
+alluvial_data <- data2 %>%
+  group_by(subject_race, subject_sex, reason_for_stop, district, outcome) %>%
+  summarise(Frequency = n(), .groups = 'drop')
+
+ggplot(data = alluvial_data,
+       aes(y = Frequency, 
+           axis1 = subject_race, 
+           axis2 = subject_sex, 
+           axis3 = reason_for_stop, 
+           axis4 = district,
+           axis5 = outcome)) +
+  
+  geom_alluvium(aes(fill = outcome), width = 1/8, alpha = 0.7) +
+  
+  geom_stratum(width = 1/8, fill = "grey80", color = "black") +
+  
+  geom_label(stat = "stratum", aes(label = after_stat(stratum)), 
+             size = 2.5, 
+             linewidth = 0,               # Removes the harsh black border
+             fill = alpha("white", 0.7)) +
+  
+  scale_x_discrete(limits = c("Race", "Sex", "Reason for Stop", "District", "Outcome"),
+                   expand = c(0.05, 0.05)) +
+  
+  scale_fill_brewer(type = "qual", palette = "Set1") + 
+  theme_minimal() +
+  labs(title = "Flow of Police Stops by Demographics, Context, and Geography",
+       subtitle = "Tracing the path from subject demographics to final stop outcome",
+       y = "Number of Stops",
+       fill = "Outcome") +
+  theme(axis.text.x = element_text(face = "bold", size = 12),
+        panel.grid.major.x = element_blank())
+```
+
 #### Individual contributions
 
 Each individual must comment on their contributions to the team research question. Only individuals who contribute to the team section (and state their contributions) will get points for the team section.
