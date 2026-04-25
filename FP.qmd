@@ -454,6 +454,7 @@ Statistical methods used in sub-research questions were K-Nearest-Neighbors, Mul
 After statistical model fitting, it was found that driver characteristics alone (age, race, sex) were not statistically powerful enough to predict the outcome of the traffic stop (warning, citation, arrest). However, after considering the driver characteristic race in context, it was found that there is a statistically powerful association between race and all of the other traffic stop variables. In addition, certain districts in Hartford, CT were more punitive than others, holding the severity of crimes constant. All in all, it was found that whether or not a traffic stop resulted in a warning, citation, or arrest was, in fact, related to other factors like race or district. 
 
 3.  Comment on any ethical implications of this work.
+Although the model shows a statistically powerful association between race and all other traffic stop predictors, it could be misinterpreted as race being the most important predictor in a traffic stop. This could lead to inaccurate assumptions that the Hartford police department is racist when in fact there is no causation proven between race and being pulled over or detained. This could lead to the wrongful firing of police officers, negative connotations associated with a police department, and harmful policies put in place that negatively impact police officers.
 4.  Create at least one visualization that helps tell the overall narrative of the data.
 
 ```{r}
