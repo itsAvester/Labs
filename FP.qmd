@@ -508,7 +508,7 @@ ggplot(data = alluvial_data,
 Each individual must comment on their contributions to the team research question. Only individuals who contribute to the team section (and state their contributions) will get points for the team section.
 
 Corva: Explained Q1,Q2, and Q3 to tie all of our sub questions together to answer main question
-Averey: Explained ethical implications of our analysis to answer main question
+Averey: Explained ethical implications of our analysis to answer main question and rendered file to turn in.
 Parker: Created the team visualization
 #### **Some intended outcomes from this final project:**
 
